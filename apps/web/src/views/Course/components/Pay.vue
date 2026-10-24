@@ -7,7 +7,7 @@
       >
         <!-- 遮罩 -->
         <div
-          class="absolute inset-0 bg-zinc-900/50 backdrop-blur-sm"
+          class="absolute inset-0 app-modal-backdrop bg-zinc-900/50"
           aria-hidden="true"
         />
 

@@ -249,7 +249,8 @@ html.dark {
   .header-account { gap: 6px; }
   .theme-picker { width: 32px; height: 32px; }
   .checkin-button { padding: 5px; }
-  .checkin-button .el-icon { display: none; }
+  .checkin-button .el-icon { display: inline-flex; flex-shrink: 0; width: 12px; height: 12px; }
+  .checkin-button .el-icon svg { display: block; width: 100%; height: 100%; }
 }
 
 .dark .word-card .el-icon { color: #c6a6ff !important; }
@@ -289,7 +290,7 @@ html.dark {
 .dark .login-shell .login-close:hover { background: #ffffff14; }
 }
 @media (max-width: 600px) {
-  .login-shell { height: auto; max-height: calc(100dvh - 24px); }
+  .login-shell { width: calc(100vw - 48px); height: auto; max-height: calc(100dvh - 24px); }
   .login-form-panel { padding: 52px 24px 28px; }
 }
 
@@ -900,4 +901,24 @@ html:not(.dark) .settings-scroll :is(input, textarea)::placeholder {
   .settings-page .settings-avatar-image,
   .settings-page .guest-avatar.settings-avatar-placeholder { width: 64px; height: 64px; flex-shrink: 0; }
   .settings-page .guest-avatar.settings-avatar-placeholder { font-size: 32px; }
+}
+.el-overlay,
+.app-modal-backdrop {
+  background-color: rgb(0 0 0 / 35%);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+@media (max-width: 600px) {
+  .el-message-box,
+  .el-message-box.logout-confirm {
+    box-sizing: border-box;
+    width: calc(100% - 32px);
+    max-width: 440px;
+    --el-messagebox-padding-primary: 20px;
+    --el-messagebox-border-radius: 16px;
+  }
+  .el-message-box__message { overflow-wrap: anywhere; }
+  .el-message-box__btns { flex-wrap: wrap; gap: 8px; }
+  .el-message-box__btns .el-button + .el-button { margin-left: 0; }
 }

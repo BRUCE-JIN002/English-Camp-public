@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="isShow"
-    class="fixed inset-0 z-40 h-full w-full bg-black/30 backdrop-blur-[2px]"
+    class="fixed inset-0 z-40 h-full w-full app-modal-backdrop bg-black/30"
   />
   <Transition name="fade">
     <div v-if="isShow" class="fixed inset-0 z-50 p-4 pt-20 shadow-lg sm:p-8 sm:pt-20">

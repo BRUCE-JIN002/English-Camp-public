@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="isShowLogin"
-    class="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px]"
+    class="fixed inset-0 z-40 app-modal-backdrop bg-black/40"
   />
   <Transition name="fade">
     <div
