@@ -86,6 +86,8 @@
 .dark .theme-popover.el-popover.el-popper { box-shadow: 0 12px 32px #0009, 0 0 20px #b79af51a; }
 .chat-composer textarea:focus,
 .chat-composer textarea:focus-visible,
+.chat-edit-input:focus,
+.chat-edit-input:focus-visible,
 .learn-page .spelling-input:focus,
 .learn-page .spelling-input:focus-visible {
   outline: none;
@@ -327,7 +329,7 @@ html.dark {
 .agent-chat-empty p { color: var(--el-text-color-secondary); }
 .agent-editor.el-dialog { border: 0; box-shadow: 0 16px 48px #0003; }
 .agent-editor .el-dialog__header { background: transparent; }
-.agent-icon-options { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 4px; max-height: 132px; overflow-y: auto; }
+.agent-icon-options { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; max-height: 138px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
 .agent-icon-options button { width: 100%; height: 30px; border-radius: 8px; font-size: 20px; border: 1px solid transparent; }
 @media (min-width: 601px) and (hover: hover) and (pointer: fine) {
 .agent-icon-options button:hover { border-color: var(--camp-purple); background: #bc85ff26; }
@@ -362,7 +364,7 @@ html.dark {
 @media (prefers-reduced-motion: reduce) { .agent-edit { transition: none; } }
 
 @media (max-width: 480px) {
-  .agent-icon-options { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+  .agent-icon-options { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 }
 
 /* Keep the conversation mounted while the agent rail folds away. */
@@ -394,12 +396,12 @@ html.dark {
   .chat-workspace { position: relative; isolation: isolate; flex-direction: row; }
   .chat-workspace .chat-sidebar-slot {
     position: absolute; inset: 0 auto 0 0; z-index: 3;
-    display: flex; flex-direction: column; width: min(240px, 76%); max-height: none;
+    display: flex; flex-direction: column; width: min(216px, 70%); max-height: none;
     border-radius: 0 20px 20px 0;
     background: var(--el-bg-color); transform: translateX(0);
     transition: transform 260ms cubic-bezier(.22, 1, .36, 1), visibility 260ms;
   }
-  .chat-workspace.sidebar-collapsed .chat-sidebar-slot { width: min(240px, 76%); transform: translateX(-100%); visibility: hidden; }
+  .chat-workspace.sidebar-collapsed .chat-sidebar-slot { width: min(216px, 70%); transform: translateX(-100%); visibility: hidden; }
   .chat-sidebar-slot .conversation-sidebar { display: block; width: 100%; height: auto; flex: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior-y: contain; padding: 12px; border: 0; }
   .chat-sidebar-slot .agent-sidebar-heading h2 { display: block; font-size: 18px; }
   .chat-sidebar-slot .sidebar-caption { display: block; margin-bottom: 16px; }
@@ -450,6 +452,15 @@ html.dark {
   .wordbook-page .wordbook-filters { flex: 0 0 100%; flex-wrap: nowrap; overflow-x: auto; gap: 12px; }
   .wordbook-filters .el-checkbox { flex-shrink: 0; margin-right: 0; height: 28px; }
   .wordbook-filters .el-checkbox__label { font-size: 12px; padding-left: 5px; }
+  .wordbook-filters .el-checkbox__inner { border-radius: 50%; }
+  .wordbook-filters .el-checkbox__inner::after {
+    width: 6px; height: 6px; border: 0; border-radius: 50%;
+    left: 50%; top: 50%; background: var(--el-color-white);
+    transform: translate(-50%, -50%) scale(0);
+  }
+  .wordbook-filters .el-checkbox__input.is-checked .el-checkbox__inner::after {
+    transform: translate(-50%, -50%) scale(1);
+  }
   .wordbook-results { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; padding: 4px 4px calc(12px + env(safe-area-inset-bottom)); }
   .word-cards .word-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
   .word-cards .word-card { min-width: 0; min-height: 156px; padding: 10px 8px; border-radius: 13px; box-shadow: none; overflow: hidden; }
@@ -737,6 +748,16 @@ html.dark {
 }
 .learned-stat-link:active { translate: 0 0; box-shadow: none; }
 .chat-current-agent { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; gap: 6px; }
+.chat-current-agent > .agent-name { line-height: 20px; }
+.chat-current-agent-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-size: 16px;
+  line-height: 1;
+}
 .chat-sidebar-toggle { flex-shrink: 0; }
 .chat-main-toolbar { min-width: 0; }
 .chat-composer textarea::placeholder { color: var(--el-text-color-secondary); opacity: 1; }
@@ -922,3 +943,11 @@ html:not(.dark) .settings-scroll :is(input, textarea)::placeholder {
   .el-message-box__btns { flex-wrap: wrap; gap: 8px; }
   .el-message-box__btns .el-button + .el-button { margin-left: 0; }
 }
+
+.agent-color-label { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
+.agent-color-dot { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; }
+.agent-color-options { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px 6px; padding: 4px; max-height: 138px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
+.agent-color-options button { display: grid; place-items: center; justify-self: center; width: 28px; height: 28px; border-radius: 50%; color: #282439; border: 2px solid transparent; }
+.agent-color-options button[aria-pressed="true"] { border-color: #282439; box-shadow: 0 0 0 2px var(--el-bg-color-overlay), 0 0 0 3px var(--el-text-color-secondary); }
+
+.agent-icon-options::-webkit-scrollbar, .agent-color-options::-webkit-scrollbar { display: none; width: 0; height: 0; }

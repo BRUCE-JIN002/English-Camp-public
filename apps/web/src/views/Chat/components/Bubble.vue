@@ -19,28 +19,29 @@
             <template v-if="editingIndex === index">
               <div class="flex-1 max-w-[80%]">
                 <div
+                  v-click-outside="cancelEdit"
                   class="rounded-xl border border-blue-500/50 bg-blue-50/40 px-3 py-2"
                 >
                   <textarea
                     v-model="editingContent"
                     rows="3"
-                    class="w-full bg-transparent outline-none resize-none text-sm text-slate-800 placeholder:text-slate-400"
+                    class="chat-edit-input w-full bg-transparent outline-none resize-none text-sm text-slate-800 placeholder:text-slate-400"
                   />
                   <div class="mt-2 flex justify-end gap-2">
                     <button
-                      class="px-3 py-1.5 rounded-full text-xs font-semibold border border-gray-300 text-slate-700 bg-white hover:border-gray-400 transition cursor-pointer"
+                      class="h-6 px-2 py-0 rounded-full text-xs font-semibold border border-gray-300 text-slate-700 bg-white hover:border-gray-400 transition cursor-pointer"
                       type="button"
                       @click="cancelEdit"
                     >
-                      Cancel
+                      取消
                     </button>
                     <button
-                      class="px-3 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50 cursor-pointer"
+                      class="h-6 px-2 py-0 rounded-full text-xs font-semibold bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50 cursor-pointer"
                       type="button"
                       :disabled="!editingContent"
                       @click="submitEdit(index)"
                     >
-                      Send
+                      发送
                     </button>
                   </div>
                 </div>
@@ -226,7 +227,7 @@
     RefreshRight,
     Bottom,
   } from "@element-plus/icons-vue";
-  import { ElMessage } from "element-plus";
+  import { ElMessage, ClickOutside as vClickOutside } from "element-plus";
   import type { ChatMessageList, ChatRoleType } from "@en/common/chat";
   import { marked } from "marked";
   import { useAvatar } from "@/hooks/useAvatar";

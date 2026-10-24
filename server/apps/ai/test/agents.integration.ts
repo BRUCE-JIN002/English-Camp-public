@@ -24,11 +24,16 @@ async function main() {
   assert.equal((await fetch(base + '/prompt/list')).status, 401);
   const defaults = await request('/prompt/list');
   assert.equal(defaults.length, 8);
+  assert.ok(defaults.every(agent => agent.accentColor === '#50d8f5'));
+  await request('/prompt', 'POST', { name: 'test', icon: '🎓', prompt: 'test', accentColor: '#000000' }, users[0], 400);
   await request('/prompt', 'POST', { name: ' ', icon: '🎓', prompt: 'test' }, users[0], 400);
   await request('/prompt', 'POST', { name: 'test', icon: '🎓', prompt: 'x'.repeat(6001) }, users[0], 400);
-  const input = { name: 'Test tutor', icon: '🎓', prompt: 'Reply briefly in English.' };
+  const input = { name: 'Test tutor', icon: '🎓', prompt: 'Reply briefly in English.', accentColor: '#ff79b0' };
   const created = await request('/prompt', 'POST', input, users[0], 201);
   assert.equal(created.prompt, input.prompt);
+  assert.equal(created.accentColor, input.accentColor);
+  const legacyUpdate = await request(`/prompt/${created.role}`, 'PATCH', { name: input.name, icon: input.icon, prompt: input.prompt });
+  assert.equal(legacyUpdate.accentColor, input.accentColor);
   assert.equal((await request('/prompt/list')).length, 9);
   assert.equal((await request('/prompt/list', 'GET', undefined, users[1])).length, 8);
   await request(`/prompt/${created.role}`, 'PATCH', input, users[1], 404);
@@ -39,6 +44,7 @@ async function main() {
   assert.equal(updated.prompt, 'Only respond with AGENT_TEST_OK.');
   const normal = await request('/prompt/normal', 'PATCH', { ...input, name: 'My default' });
   assert.equal(normal.isDefault, true);
+  assert.equal(normal.accentColor, input.accentColor);
   assert.equal((await request('/prompt/list', 'GET', undefined, users[1]))[0].name, '智能助手');
   await request('/prompt/normal', 'DELETE');
   assert.ok(!(await request('/prompt/list')).some(a => a.role === 'normal'));

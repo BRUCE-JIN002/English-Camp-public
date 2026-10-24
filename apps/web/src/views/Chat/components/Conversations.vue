@@ -13,13 +13,25 @@
       <el-form label-position="top" @submit.prevent="save">
         <el-form-item label="名称" required><el-input v-model="draft.name" maxlength="30" show-word-limit placeholder="例如：口语陪练" :disabled="saving" /></el-form-item>
         <el-form-item label="图标" required>
-          <el-popover v-model:visible="iconPickerOpen" trigger="click" placement="bottom-start" :width="448" :disabled="saving" popper-class="agent-icon-popover">
+          <el-popover v-model:visible="iconPickerOpen" trigger="click" placement="bottom-start" :width="248" :disabled="saving" popper-class="agent-icon-popover">
             <template #reference>
               <button type="button" class="agent-icon-trigger" :disabled="saving" aria-label="选择 Agent 图标" :aria-expanded="iconPickerOpen">
                 <span>{{ draft.icon }}</span><el-icon><ArrowDown /></el-icon>
               </button>
             </template>
             <div class="agent-icon-options" role="group" aria-label="可选图标"><button v-for="icon in icons" :key="icon" type="button" :aria-label="`使用 ${icon}`" :aria-pressed="draft.icon === icon" @click="selectIcon(icon)">{{ icon }}</button></div>
+          </el-popover>
+        </el-form-item>
+        <el-form-item label="强调色">
+          <el-popover v-model:visible="colorPickerOpen" trigger="click" placement="bottom-start" :width="248" :disabled="saving" popper-class="agent-icon-popover">
+            <template #reference>
+              <button type="button" class="agent-icon-trigger" :disabled="saving" aria-label="选择 Agent 强调色" :aria-expanded="colorPickerOpen">
+                <span class="agent-color-label"><i class="agent-color-dot" :style="{ backgroundColor: draft.accentColor }" /></span><el-icon><ArrowDown /></el-icon>
+              </button>
+            </template>
+            <div class="agent-color-options" role="group" aria-label="可选强调色">
+              <button v-for="color in agentAccentColors" :key="color.value" type="button" :aria-label="color.name" :aria-pressed="draft.accentColor === color.value" :style="{ backgroundColor: color.value }" @click="selectColor(color.value)"><el-icon v-if="draft.accentColor === color.value"><Check /></el-icon></button>
+            </div>
           </el-popover>
         </el-form-item>
         <el-form-item label="人物设定" required><el-input v-model="draft.prompt" type="textarea" :rows="6" maxlength="6000" show-word-limit placeholder="描述角色的身份、说话风格、使用语言，以及你希望它如何帮助你。" :disabled="saving" /></el-form-item>
@@ -32,9 +44,10 @@
 
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue';
-import { Plus, MoreFilled, ArrowDown } from '@element-plus/icons-vue';
+import { Plus, MoreFilled, ArrowDown, Check } from '@element-plus/icons-vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import type { ChatMode, ChatModeList } from '@en/common/chat';
+import { agentAccentColors, defaultAgentAccentColor } from '@en/common/chat/colors.js';
 import { createChatAgent, updateChatAgent, deleteChatAgent } from '@/apis/chat';
 defineProps<{ modes: ChatModeList; activeId: string | null }>();
 const emit = defineEmits<{
@@ -45,27 +58,29 @@ const emit = defineEmits<{
 const editorOpen = ref(false);
 const saving = ref(false);
 const editing = ref<ChatMode | null>(null);
-const draft = reactive({ name: '', icon: '💬', prompt: '' });
+const draft = reactive({ name: '', icon: '💬', prompt: '', accentColor: defaultAgentAccentColor as string });
+const colorPickerOpen = ref(false);
+function selectColor(color: string) { draft.accentColor = color; colorPickerOpen.value = false; }
 const iconPickerOpen = ref(false);
 const icons = ['💬', '🎓', '🌍', '💼', '🎨', '🤖', '🧠', '🐱',
   '📚', '✍️', '🎤', '🎧', '🎵', '🎬', '🎮', '💻',
   '🔬', '🧪', '🔭', '🚀', '✈️', '🧭', '🏕️', '☕',
   '🍳', '🌱', '🌻', '⭐', '💡', '🔥', '🦊', '🐼',
   '🐶', '🐧', '🐉', '🦄', '🧙', '🦸', '👩', '🕶️'];
-watch(editorOpen, () => { iconPickerOpen.value = false; });
+watch(editorOpen, () => { iconPickerOpen.value = false; colorPickerOpen.value = false; });
 function selectIcon(icon: string) {
   draft.icon = icon;
   iconPickerOpen.value = false;
 }
 function openEditor(agent?: ChatMode) {
   editing.value = agent ?? null;
-  Object.assign(draft, agent ? { name: agent.name, icon: agent.icon, prompt: agent.prompt } : { name: '', icon: '💬', prompt: '' });
+  Object.assign(draft, agent ? { name: agent.name, icon: agent.icon, prompt: agent.prompt, accentColor: agent.accentColor ?? defaultAgentAccentColor } : { name: '', icon: '💬', prompt: '', accentColor: defaultAgentAccentColor });
   editorOpen.value = true;
 }
 function errorMessage(error: any) { return error?.response?.data?.message || '操作失败，请稍后重试'; }
 async function save() {
   if (saving.value) return;
-  const input = { name: draft.name.trim(), icon: draft.icon.trim(), prompt: draft.prompt.trim() };
+  const input = { name: draft.name.trim(), icon: draft.icon.trim(), prompt: draft.prompt.trim(), accentColor: draft.accentColor };
   if (!input.name || !input.icon || !input.prompt) return void ElMessage.warning('请填写名称、图标和人物设定');
   saving.value = true;
   try {

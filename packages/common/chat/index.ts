@@ -15,6 +15,7 @@ export type ChatMessageList = ChatMessage[];
 
 //左侧列表所返回的对象
 export type ChatMode = {
+  accentColor?: string;
   name: string;
   icon: string;
   prompt: string;
@@ -36,4 +37,4 @@ export type ChatDto = {
   userId: string; // 用户id
 };
 
-export type ChatAgentInput = { name: string; icon: string; prompt: string };
+export type ChatAgentInput = { name: string; icon: string; prompt: string; accentColor?: string };

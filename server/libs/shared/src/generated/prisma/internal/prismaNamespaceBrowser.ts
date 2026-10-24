@@ -270,6 +270,7 @@ export type CourseScalarFieldEnum = (typeof CourseScalarFieldEnum)[keyof typeof 
 
 
 export const ChatAgentScalarFieldEnum = {
+  accentColor: 'accentColor',
   id: 'id',
   userId: 'userId',
   role: 'role',

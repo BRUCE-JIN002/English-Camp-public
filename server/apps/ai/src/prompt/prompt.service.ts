@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { chatMode } from './prompt.mode';
 import { PrismaService, ResponseService } from '@libs/shared';
 import type { ChatAgentInput, ChatMode } from '@en/common/chat';
+import { agentAccentColors, defaultAgentAccentColor } from '@en/common/chat/colors.js';
 
 @Injectable()
 export class PromptService {
@@ -11,7 +12,7 @@ export class PromptService {
   private defaults(): ChatMode[] {
     return chatMode.map(item => {
       const [icon, ...name] = item.label.split(' ');
-      return { ...item, id: item.role, name: name.join(' '), icon, isDefault: true };
+      return { ...item, id: item.role, name: name.join(' '), icon, isDefault: true, accentColor: defaultAgentAccentColor };
     });
   }
 
@@ -22,7 +23,7 @@ export class PromptService {
     const roles = new Set(defaults.map(item => item.role));
     const format = (item: ChatAgentInput & { role: string }, isDefault: boolean): ChatMode => ({
       id: item.role, role: item.role, name: item.name, icon: item.icon, prompt: item.prompt,
-      label: `${item.icon} ${item.name}`, isDefault,
+      label: `${item.icon} ${item.name}`, isDefault, accentColor: item.accentColor ?? defaultAgentAccentColor,
     });
     return [
       ...defaults.flatMap(item => {
@@ -48,6 +49,12 @@ export class PromptService {
         throw new BadRequestException(`${key === 'name' ? '名称' : key === 'icon' ? '图标' : '人物设定'}不能为空，且不能超过 ${limits[key]} 个字符`);
       }
       result[key] = value.trim();
+    }
+    if (input.accentColor !== undefined) {
+      if (!agentAccentColors.some(color => color.value === input.accentColor)) {
+        throw new BadRequestException('请选择有效的强调色');
+      }
+      result.accentColor = input.accentColor;
     }
     return result;
   }

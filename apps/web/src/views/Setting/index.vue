@@ -59,7 +59,7 @@
                 accept="image/*"
                 :on-change="onAvatarSelect"
               >
-                <el-button type="primary">选择头像</el-button>
+                <el-button type="primary">更换头像</el-button>
               </el-upload>
 
               <div class="text-xs text-slate-500">

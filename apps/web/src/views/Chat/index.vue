@@ -14,7 +14,7 @@
       <section class="chat-main" :inert="isMobile && !sidebarCollapsed">
         <div class="chat-main-toolbar">
           <button class="chat-sidebar-toggle" :aria-label="sidebarCollapsed ? '展开 Agent 列表' : '收起 Agent 列表'" :title="sidebarCollapsed ? '展开 Agent 列表' : '收起 Agent 列表'" :aria-expanded="!sidebarCollapsed" aria-controls="agent-sidebar" @click="sidebarCollapsed = !sidebarCollapsed"><el-icon><Expand v-if="sidebarCollapsed" /><Fold v-else /></el-icon></button>
-          <span class="chat-current-agent" :title="currentAgent?.name">
+          <span class="chat-current-agent" :title="currentAgent?.name" :style="{ backgroundColor: currentAgent?.accentColor || '#50d8f5' }">
             <span v-if="currentAgent" class="chat-current-agent-icon" aria-hidden="true">{{ currentAgent.icon }}</span>
             <span class="agent-name">{{ currentAgent?.name ?? 'AI 对话' }}</span>
           </span>

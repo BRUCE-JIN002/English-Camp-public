@@ -25,6 +25,7 @@ export type AggregateChatAgent = {
 }
 
 export type ChatAgentMinAggregateOutputType = {
+  accentColor: string | null
   id: string | null
   userId: string | null
   role: string | null
@@ -37,6 +38,7 @@ export type ChatAgentMinAggregateOutputType = {
 }
 
 export type ChatAgentMaxAggregateOutputType = {
+  accentColor: string | null
   id: string | null
   userId: string | null
   role: string | null
@@ -49,6 +51,7 @@ export type ChatAgentMaxAggregateOutputType = {
 }
 
 export type ChatAgentCountAggregateOutputType = {
+  accentColor: number
   id: number
   userId: number
   role: number
@@ -63,6 +66,7 @@ export type ChatAgentCountAggregateOutputType = {
 
 
 export type ChatAgentMinAggregateInputType = {
+  accentColor?: true
   id?: true
   userId?: true
   role?: true
@@ -75,6 +79,7 @@ export type ChatAgentMinAggregateInputType = {
 }
 
 export type ChatAgentMaxAggregateInputType = {
+  accentColor?: true
   id?: true
   userId?: true
   role?: true
@@ -87,6 +92,7 @@ export type ChatAgentMaxAggregateInputType = {
 }
 
 export type ChatAgentCountAggregateInputType = {
+  accentColor?: true
   id?: true
   userId?: true
   role?: true
@@ -172,6 +178,7 @@ export type ChatAgentGroupByArgs<ExtArgs extends runtime.Types.Extensions.Intern
 }
 
 export type ChatAgentGroupByOutputType = {
+  accentColor: string
   id: string
   userId: string
   role: string
@@ -205,6 +212,7 @@ export type ChatAgentWhereInput = {
   AND?: Prisma.ChatAgentWhereInput | Prisma.ChatAgentWhereInput[]
   OR?: Prisma.ChatAgentWhereInput[]
   NOT?: Prisma.ChatAgentWhereInput | Prisma.ChatAgentWhereInput[]
+  accentColor?: Prisma.StringFilter<"ChatAgent"> | string
   id?: Prisma.StringFilter<"ChatAgent"> | string
   userId?: Prisma.StringFilter<"ChatAgent"> | string
   role?: Prisma.StringFilter<"ChatAgent"> | string
@@ -218,6 +226,7 @@ export type ChatAgentWhereInput = {
 }
 
 export type ChatAgentOrderByWithRelationInput = {
+  accentColor?: Prisma.SortOrder
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
@@ -236,6 +245,7 @@ export type ChatAgentWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.ChatAgentWhereInput | Prisma.ChatAgentWhereInput[]
   OR?: Prisma.ChatAgentWhereInput[]
   NOT?: Prisma.ChatAgentWhereInput | Prisma.ChatAgentWhereInput[]
+  accentColor?: Prisma.StringFilter<"ChatAgent"> | string
   userId?: Prisma.StringFilter<"ChatAgent"> | string
   role?: Prisma.StringFilter<"ChatAgent"> | string
   name?: Prisma.StringFilter<"ChatAgent"> | string
@@ -248,6 +258,7 @@ export type ChatAgentWhereUniqueInput = Prisma.AtLeast<{
 }, "id" | "userId_role">
 
 export type ChatAgentOrderByWithAggregationInput = {
+  accentColor?: Prisma.SortOrder
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
@@ -266,6 +277,7 @@ export type ChatAgentScalarWhereWithAggregatesInput = {
   AND?: Prisma.ChatAgentScalarWhereWithAggregatesInput | Prisma.ChatAgentScalarWhereWithAggregatesInput[]
   OR?: Prisma.ChatAgentScalarWhereWithAggregatesInput[]
   NOT?: Prisma.ChatAgentScalarWhereWithAggregatesInput | Prisma.ChatAgentScalarWhereWithAggregatesInput[]
+  accentColor?: Prisma.StringWithAggregatesFilter<"ChatAgent"> | string
   id?: Prisma.StringWithAggregatesFilter<"ChatAgent"> | string
   userId?: Prisma.StringWithAggregatesFilter<"ChatAgent"> | string
   role?: Prisma.StringWithAggregatesFilter<"ChatAgent"> | string
@@ -278,6 +290,7 @@ export type ChatAgentScalarWhereWithAggregatesInput = {
 }
 
 export type ChatAgentCreateInput = {
+  accentColor?: string
   id?: string
   role: string
   name: string
@@ -290,6 +303,7 @@ export type ChatAgentCreateInput = {
 }
 
 export type ChatAgentUncheckedCreateInput = {
+  accentColor?: string
   id?: string
   userId: string
   role: string
@@ -302,6 +316,7 @@ export type ChatAgentUncheckedCreateInput = {
 }
 
 export type ChatAgentUpdateInput = {
+  accentColor?: Prisma.StringFieldUpdateOperationsInput | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -314,6 +329,7 @@ export type ChatAgentUpdateInput = {
 }
 
 export type ChatAgentUncheckedUpdateInput = {
+  accentColor?: Prisma.StringFieldUpdateOperationsInput | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
@@ -326,6 +342,7 @@ export type ChatAgentUncheckedUpdateInput = {
 }
 
 export type ChatAgentCreateManyInput = {
+  accentColor?: string
   id?: string
   userId: string
   role: string
@@ -338,6 +355,7 @@ export type ChatAgentCreateManyInput = {
 }
 
 export type ChatAgentUpdateManyMutationInput = {
+  accentColor?: Prisma.StringFieldUpdateOperationsInput | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -349,6 +367,7 @@ export type ChatAgentUpdateManyMutationInput = {
 }
 
 export type ChatAgentUncheckedUpdateManyInput = {
+  accentColor?: Prisma.StringFieldUpdateOperationsInput | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
@@ -376,6 +395,7 @@ export type ChatAgentUserIdRoleCompoundUniqueInput = {
 }
 
 export type ChatAgentCountOrderByAggregateInput = {
+  accentColor?: Prisma.SortOrder
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
@@ -388,6 +408,7 @@ export type ChatAgentCountOrderByAggregateInput = {
 }
 
 export type ChatAgentMaxOrderByAggregateInput = {
+  accentColor?: Prisma.SortOrder
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
@@ -400,6 +421,7 @@ export type ChatAgentMaxOrderByAggregateInput = {
 }
 
 export type ChatAgentMinOrderByAggregateInput = {
+  accentColor?: Prisma.SortOrder
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
@@ -454,6 +476,7 @@ export type ChatAgentUncheckedUpdateManyWithoutUserNestedInput = {
 }
 
 export type ChatAgentCreateWithoutUserInput = {
+  accentColor?: string
   id?: string
   role: string
   name: string
@@ -465,6 +488,7 @@ export type ChatAgentCreateWithoutUserInput = {
 }
 
 export type ChatAgentUncheckedCreateWithoutUserInput = {
+  accentColor?: string
   id?: string
   role: string
   name: string
@@ -505,6 +529,7 @@ export type ChatAgentScalarWhereInput = {
   AND?: Prisma.ChatAgentScalarWhereInput | Prisma.ChatAgentScalarWhereInput[]
   OR?: Prisma.ChatAgentScalarWhereInput[]
   NOT?: Prisma.ChatAgentScalarWhereInput | Prisma.ChatAgentScalarWhereInput[]
+  accentColor?: Prisma.StringFilter<"ChatAgent"> | string
   id?: Prisma.StringFilter<"ChatAgent"> | string
   userId?: Prisma.StringFilter<"ChatAgent"> | string
   role?: Prisma.StringFilter<"ChatAgent"> | string
@@ -517,6 +542,7 @@ export type ChatAgentScalarWhereInput = {
 }
 
 export type ChatAgentCreateManyUserInput = {
+  accentColor?: string
   id?: string
   role: string
   name: string
@@ -528,6 +554,7 @@ export type ChatAgentCreateManyUserInput = {
 }
 
 export type ChatAgentUpdateWithoutUserInput = {
+  accentColor?: Prisma.StringFieldUpdateOperationsInput | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -539,6 +566,7 @@ export type ChatAgentUpdateWithoutUserInput = {
 }
 
 export type ChatAgentUncheckedUpdateWithoutUserInput = {
+  accentColor?: Prisma.StringFieldUpdateOperationsInput | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -550,6 +578,7 @@ export type ChatAgentUncheckedUpdateWithoutUserInput = {
 }
 
 export type ChatAgentUncheckedUpdateManyWithoutUserInput = {
+  accentColor?: Prisma.StringFieldUpdateOperationsInput | string
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
@@ -563,6 +592,7 @@ export type ChatAgentUncheckedUpdateManyWithoutUserInput = {
 
 
 export type ChatAgentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  accentColor?: boolean
   id?: boolean
   userId?: boolean
   role?: boolean
@@ -576,6 +606,7 @@ export type ChatAgentSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
 }, ExtArgs["result"]["chatAgent"]>
 
 export type ChatAgentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  accentColor?: boolean
   id?: boolean
   userId?: boolean
   role?: boolean
@@ -589,6 +620,7 @@ export type ChatAgentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
 }, ExtArgs["result"]["chatAgent"]>
 
 export type ChatAgentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
+  accentColor?: boolean
   id?: boolean
   userId?: boolean
   role?: boolean
@@ -602,6 +634,7 @@ export type ChatAgentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
 }, ExtArgs["result"]["chatAgent"]>
 
 export type ChatAgentSelectScalar = {
+  accentColor?: boolean
   id?: boolean
   userId?: boolean
   role?: boolean
@@ -613,7 +646,7 @@ export type ChatAgentSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ChatAgentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "role" | "name" | "icon" | "prompt" | "deleted" | "createdAt" | "updatedAt", ExtArgs["result"]["chatAgent"]>
+export type ChatAgentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"accentColor" | "id" | "userId" | "role" | "name" | "icon" | "prompt" | "deleted" | "createdAt" | "updatedAt", ExtArgs["result"]["chatAgent"]>
 export type ChatAgentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -630,6 +663,7 @@ export type $ChatAgentPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     user: Prisma.$UserPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
+    accentColor: string
     id: string
     userId: string
     role: string
@@ -722,8 +756,8 @@ export interface ChatAgentDelegate<ExtArgs extends runtime.Types.Extensions.Inte
    * // Get first 10 ChatAgents
    * const chatAgents = await prisma.chatAgent.findMany({ take: 10 })
    * 
-   * // Only select the `id`
-   * const chatAgentWithIdOnly = await prisma.chatAgent.findMany({ select: { id: true } })
+   * // Only select the `accentColor`
+   * const chatAgentWithAccentColorOnly = await prisma.chatAgent.findMany({ select: { accentColor: true } })
    * 
    */
   findMany<T extends ChatAgentFindManyArgs>(args?: Prisma.SelectSubset<T, ChatAgentFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChatAgentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -767,9 +801,9 @@ export interface ChatAgentDelegate<ExtArgs extends runtime.Types.Extensions.Inte
    *   ]
    * })
    * 
-   * // Create many ChatAgents and only return the `id`
-   * const chatAgentWithIdOnly = await prisma.chatAgent.createManyAndReturn({
-   *   select: { id: true },
+   * // Create many ChatAgents and only return the `accentColor`
+   * const chatAgentWithAccentColorOnly = await prisma.chatAgent.createManyAndReturn({
+   *   select: { accentColor: true },
    *   data: [
    *     // ... provide data here
    *   ]
@@ -858,9 +892,9 @@ export interface ChatAgentDelegate<ExtArgs extends runtime.Types.Extensions.Inte
    *   ]
    * })
    * 
-   * // Update zero or more ChatAgents and only return the `id`
-   * const chatAgentWithIdOnly = await prisma.chatAgent.updateManyAndReturn({
-   *   select: { id: true },
+   * // Update zero or more ChatAgents and only return the `accentColor`
+   * const chatAgentWithAccentColorOnly = await prisma.chatAgent.updateManyAndReturn({
+   *   select: { accentColor: true },
    *   where: {
    *     // ... provide filter here
    *   },
@@ -1063,6 +1097,7 @@ export interface Prisma__ChatAgentClient<T, Null = never, ExtArgs extends runtim
  * Fields of the ChatAgent model
  */
 export interface ChatAgentFieldRefs {
+  readonly accentColor: Prisma.FieldRef<"ChatAgent", 'String'>
   readonly id: Prisma.FieldRef<"ChatAgent", 'String'>
   readonly userId: Prisma.FieldRef<"ChatAgent", 'String'>
   readonly role: Prisma.FieldRef<"ChatAgent", 'String'>

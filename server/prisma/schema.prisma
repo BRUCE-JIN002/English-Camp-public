@@ -239,6 +239,7 @@ model Course {
 
 // Per-user overrides also record deleted defaults, so they never reappear on refresh.
 model ChatAgent {
+  accentColor String @default("#50d8f5")
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)

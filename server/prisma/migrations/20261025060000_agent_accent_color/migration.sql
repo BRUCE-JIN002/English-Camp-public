@@ -1,0 +1,1 @@
+ALTER TABLE "ChatAgent" ADD COLUMN "accentColor" TEXT NOT NULL DEFAULT '#50d8f5';
