@@ -16,7 +16,6 @@
             <button v-for="option in themeOptions" :key="option.value" :aria-pressed="themeMode === option.value" @click="onThemeChange(option.value)">
               <el-icon aria-hidden="true"><component :is="option.icon" /></el-icon>
               <span>{{ option.label }}</span>
-              <el-icon v-if="themeMode === option.value" class="theme-option-check" aria-hidden="true"><Check /></el-icon>
             </button>
           </div>
         </el-popover>

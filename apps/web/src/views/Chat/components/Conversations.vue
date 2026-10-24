@@ -9,7 +9,7 @@
       <button class="agent-select" :title="mode.name" :aria-pressed="activeId === mode.id" @click="emit('onGetRole', mode.role)"><span aria-hidden="true">{{ mode.icon }}</span><span class="agent-name">{{ mode.name }}</span></button>
       <button class="agent-edit" :aria-label="`编辑 ${mode.name}`" @click="openEditor(mode)"><el-icon><MoreFilled /></el-icon></button>
     </div>
-    <el-dialog v-model="editorOpen" :title="editing ? '编辑 Agent' : '新建 Agent'" width="480px" align-center append-to-body class="agent-editor" :close-on-click-modal="!saving" :close-on-press-escape="!saving" :show-close="!saving">
+    <el-dialog v-model="editorOpen" :title="editing ? '编辑 Agent' : '新建 Agent'" width="480px" align-center append-to-body class="agent-editor" modal-class="agent-editor-overlay" :close-on-click-modal="!saving" :close-on-press-escape="!saving" :show-close="!saving">
       <el-form label-position="top" @submit.prevent="save">
         <el-form-item label="名称" required><el-input v-model="draft.name" maxlength="30" show-word-limit placeholder="例如：口语陪练" :disabled="saving" /></el-form-item>
         <el-form-item label="图标" required>

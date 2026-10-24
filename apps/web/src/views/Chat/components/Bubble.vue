@@ -146,24 +146,24 @@
             @keydown.enter.exact.prevent="sendMessage"
           />
         </div>
-        <div class="absolute bottom-3 right-3 flex items-center gap-3">
+        <div class="chat-composer-actions absolute bottom-3 right-3 flex items-center gap-3">
           <button
-            v-if="!isRecording && isVoiceSupported"
-            class="text-slate-500 hover:text-blue-500 transition flex items-center cursor-pointer"
+            v-if="!disableVoice && !isRecording && isVoiceSupported"
+            class="chat-voice text-slate-500 hover:text-blue-500 transition flex items-center cursor-pointer"
             type="button"
             title="开启语音"
             @click="startRecording"
           >
-            <el-icon :size="22"><Mute /></el-icon>
+            <el-icon :size="18"><Mute /></el-icon>
           </button>
           <button
-            v-else-if="isRecording"
-            class="text-blue-500 transition flex items-center cursor-pointer"
+            v-else-if="!disableVoice && isRecording"
+            class="chat-voice text-blue-500 transition flex items-center cursor-pointer"
             type="button"
             title="关闭语音"
             @click="stopRecording"
           >
-            <el-icon :size="22"><Microphone /></el-icon>
+            <el-icon :size="18"><Microphone /></el-icon>
           </button>
           <button
             class="chat-send size-9 rounded-full ml-2 bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
@@ -242,6 +242,7 @@
     loadingHistory?: boolean;
     animationStart?: number | null;
     conversationVersion?: number;
+    disableVoice?: boolean;
   }>();
   const messageIds = new WeakMap<object, number>();
   let nextMessageId = 0;
@@ -265,6 +266,9 @@
     continuous: true,
   });
   watch(voiceError, (error) => { if (error) ElMessage.warning(error); });
+  watch(() => props.disableVoice, (disabled) => {
+    if (disabled) stop();
+  });
   const aiIconText = computed(() => props.aiIcon ?? "AI");
   const chipBase = "px-3 py-1.5 rounded-full text-xs font-semibold transition";
   const chipActive =
@@ -282,7 +286,9 @@
 
   // 开始录音
   const startRecording = () => {
+    if (props.disableVoice) return;
     start((result) => {
+      if (props.disableVoice) return;
       message.value = result;
     });
   };

@@ -21,7 +21,7 @@
         @keyup.enter="searchWord"
         class="w-full max-w-xs"
         v-model="query.word"
-        placeholder="请输入单词"
+        placeholder="请输入要查找的单词"
       ></el-input>
       <el-button @click="searchWord" type="primary">搜索</el-button>
       <div class="wordbook-filters module-row gap-2">
@@ -39,45 +39,7 @@
     <el-skeleton v-if="initialLoading" :rows="6" animated />
     <div v-else-if="loadError && !list.length" class="load-state" role="status"><h2>词库暂时没有加载成功</h2><p>请检查服务连接，再试一次。</p><el-button @click="searchWord">重新加载</el-button></div>
     <el-empty v-else-if="!list.length" description="没有找到匹配的单词，试试其他拼写或筛选条件。" />
-    <div v-else class="word-grid">
-      <div
-        class="word-card h-full min-h-[220px] cursor-pointer bg-white text-gray-800"
-        v-for="(item, index) in list"
-        :key="item.id"
-        :style="{ '--entrance-delay': `${(index < 12 ? Math.min(index, 4) * 30 : 0)}ms` }"
-      >
-        <div class="">
-          <div class="text-sm font-semibold text-blue-600 mb-1">
-            {{ item.word }}
-          </div>
-          <div class="text-sm text-gray-500 mb-1 flex items-center gap-2">
-            {{ item.phonetic }}
-            <el-icon size="18" color="#2563EB" @click="playAudio(item.word)">
-              <VideoPlay />
-            </el-icon>
-          </div>
-          <div class="text-sm text-gray-700 mb-1 overflow-hidden line-clamp-2">
-            {{ item.definition }}
-          </div>
-          <div
-            v-html="item.translation"
-            class="text-sm text-gray-600 mb-1 overflow-hidden line-clamp-2"
-          ></div>
-          <div
-            class="text-sm text-gray-600 mt-3 flex items-center gap-2 flex-wrap"
-          >
-            <el-tag v-if="item.gk" type="primary" size="small">高考</el-tag>
-            <el-tag v-if="item.zk" type="primary" size="small">中考</el-tag>
-            <el-tag v-if="item.gre" type="primary" size="small">GRE</el-tag>
-            <el-tag v-if="item.toefl" type="primary" size="small">TOEFL</el-tag>
-            <el-tag v-if="item.ielts" type="primary" size="small">IELTS</el-tag>
-            <el-tag v-if="item.cet6" type="primary" size="small">六级</el-tag>
-            <el-tag v-if="item.cet4" type="primary" size="small">四级</el-tag>
-            <el-tag v-if="item.ky" type="primary" size="small">考研</el-tag>
-          </div>
-        </div>
-      </div>
-    </div>
+    <WordCards v-else :list="list" />
     <div ref="loadTrigger" class="wordbook-load-more" aria-live="polite">
       <span v-if="loading && list.length">正在加载更多单词…</span>
       <template v-else-if="loadError && list.length"><span>加载失败，已有单词已保留。</span><el-button @click="loadMore">重试</el-button></template>
@@ -85,6 +47,7 @@
       <el-button v-else-if="list.length && hasMore" text @click="loadMore">加载更多</el-button>
     </div>
     </div>
+
   </div>
 </template>
 
@@ -92,10 +55,9 @@
   import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from "vue";
   import { getWordBookList } from "@/apis/word-book";
   import type { WordQuery, WordList } from "@en/common/word";
-  import { Reading, VideoPlay } from "@element-plus/icons-vue";
-  import { useAudio } from "@/hooks/useAudio";
+  import { Reading } from "@element-plus/icons-vue";
+  import WordCards from "@/components/WordCards/index.vue";
 
-  const { playAudio } = useAudio();
   const loading = ref(false);
   const hasMore = ref(true);
   const initialLoading = computed(() => loading.value && !list.value.length);

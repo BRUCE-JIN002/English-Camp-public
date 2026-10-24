@@ -33,6 +33,7 @@
         :loadingHistory="loadingHistory"
         :animationStart="animationStart"
         :conversationVersion="conversationVersion"
+        :disableVoice="isMobile"
         @onEditMessage="onEditMessage"
         @onRegenerate="onRegenerate"
         @onSendMessage="sendMessage"
@@ -46,8 +47,9 @@
   import Conversations from "./components/Conversations.vue";
   import Bubble from "./components/Bubble.vue";
   import { useUserStore } from "@/stores/user";
+  import { getSelectedChatRole, rememberChatRole, forgetChatRole } from "@/stores/chatSelection";
   import { getChatHistory, getChatMode } from "@/apis/chat";
-  import { ref, computed, onMounted, onBeforeUnmount, nextTick } from "vue";
+  import { ref, reactive, markRaw, computed, onMounted, onBeforeUnmount, nextTick } from "vue";
   import { ElMessage } from "element-plus";
   import { sse, CHAT_URL } from "@/apis/sse";
   import type {
@@ -68,7 +70,6 @@
 
   const defaultIcon = "💬";
 
-  const chatList = ref<ChatMessageList>([]);
   const role = ref<ChatRoleType>("normal");
   const chatModeList = ref<ChatModeList>([]);
   const activeId = ref<string | null>(null);
@@ -87,7 +88,7 @@
   };
   const selectRole = (newRole: ChatRoleType) => {
     closeMobileSidebar();
-    if (newRole !== role.value || !activeId.value) return getRole(newRole);
+    if (newRole !== role.value || !activeId.value || !getConversation(newRole).loaded) return getRole(newRole);
   };
   let swipe: { x: number; y: number; dx: number; horizontal: boolean } | null = null;
   function cancelSwipe() { swipe = null; }
@@ -126,19 +127,38 @@
   const aiIcon = ref<string>(defaultIcon);
   const userStore = useUserStore();
   const userId = userStore.user?.id;
-  const currentController = ref<AbortController | null>(null);
-
-  const streaming = ref(false);
-  const loadingHistory = ref(false);
-  const animationStart = ref<number | null>(null);
-  const conversationVersion = ref(0);
-  let historyRequest = 0;
-  const stopStream = () => {
-    currentController.value?.abort();
-    currentController.value = null;
-    streaming.value = false;
+  type Conversation = {
+    messages: ChatMessageList;
+    controller: AbortController | null;
+    loading: boolean;
+    loaded: boolean;
+    animationStart: number | null;
   };
-  onBeforeUnmount(() => { historyRequest++; stopStream(); mobileLayout.removeEventListener("change", syncMobileLayout); });
+  const conversations = new Map<string, Conversation>();
+  const getConversation = (key: string) => {
+    let state = conversations.get(key);
+    if (!state) {
+      state = reactive<Conversation>({ messages: [], controller: null, loading: false, loaded: false, animationStart: null });
+      conversations.set(key, state);
+    }
+    return state;
+  };
+  const conversation = computed(() => getConversation(role.value));
+  const chatList = computed({ get: () => conversation.value.messages, set: value => { conversation.value.messages = value; } });
+  const streaming = computed(() => !!conversation.value.controller);
+  const loadingHistory = computed(() => conversation.value.loading);
+  const animationStart = computed({ get: () => conversation.value.animationStart, set: value => { conversation.value.animationStart = value; } });
+  const conversationVersion = ref(0);
+  let disposed = false;
+  const stopStream = (state = conversation.value) => {
+    state.controller?.abort();
+    state.controller = null;
+  };
+  onBeforeUnmount(() => {
+    disposed = true;
+    conversations.forEach(state => stopStream(state));
+    mobileLayout.removeEventListener("change", syncMobileLayout);
+  });
 
   const initModes = async () => {
     modesLoading.value = true;
@@ -147,8 +167,10 @@
       const res = await getChatMode();
       if (res.code !== 200) throw new Error(res.message);
       chatModeList.value = res.data ?? [];
-      const first = chatModeList.value[0];
-      if (first) await getRole(first.role);
+      if (disposed) return;
+      const remembered = userId ? getSelectedChatRole(userId) : undefined;
+      const selected = chatModeList.value.find(agent => agent.role === remembered) ?? chatModeList.value[0];
+      if (selected) await getRole(selected.role);
     } catch { modesError.value = true; }
     finally { modesLoading.value = false; }
   };
@@ -159,60 +181,61 @@
     else chatModeList.value.push(agent);
     if (created || !activeId.value) await getRole(agent.role);
     else if (role.value === agent.role) {
-      stopStream();
       aiIcon.value = agent.icon;
     }
   };
 
   const onAgentDeleted = async (deletedRole: string) => {
+    if (userId) forgetChatRole(userId, deletedRole);
     chatModeList.value = chatModeList.value.filter(item => item.role !== deletedRole);
+    const deleted = conversations.get(deletedRole);
+    if (deleted) stopStream(deleted);
+    conversations.delete(deletedRole);
     if (role.value !== deletedRole) return;
-    ++historyRequest;
-    stopStream();
-    chatList.value = [];
     activeId.value = null;
     role.value = '';
-    loadingHistory.value = false;
     const first = chatModeList.value[0];
     if (first) await getRole(first.role);
   };
 
   const getRole = async (newRole: ChatRoleType) => {
-    const request = ++historyRequest;
-    stopStream();
-    animationStart.value = null;
-    chatList.value = [];
     role.value = newRole;
+    const state = getConversation(newRole);
+    state.animationStart = null;
+    conversationVersion.value++;
     const current = chatModeList.value.find((m) => m.role === newRole);
     activeId.value = current?.id ?? null;
+    if (current && userId) rememberChatRole(userId, current.role);
     aiIcon.value = current?.icon ?? defaultIcon;
-    loadingHistory.value = !!userId;
+    // A background reply owns its message array; never replace it with a history snapshot.
+    if (state.loaded || state.loading || state.controller || !userId) return;
+    state.loading = true;
+    const isCurrent = () => !disposed && conversations.get(newRole) === state;
     try {
-      if (userId) {
-        const res = await getChatHistory(userId, newRole);
-        if (request === historyRequest) chatList.value = res.data ?? [];
+      const res = await getChatHistory(userId, newRole);
+      if (!res.success) throw new Error(res.message);
+      if (isCurrent()) {
+        state.messages = res.data ?? [];
+        state.loaded = true;
       }
     } catch {
-      if (request === historyRequest) ElMessage.error('历史对话加载失败，请重新选择对话模式重试');
+      if (isCurrent() && role.value === newRole) ElMessage.error('历史对话加载失败，请重新选择对话模式重试');
     } finally {
-      if (request === historyRequest) {
-        loadingHistory.value = false;
-        conversationVersion.value++;
+      if (isCurrent()) {
+        state.loading = false;
+        if (role.value === newRole) conversationVersion.value++;
       }
     }
   };
 
   const requestReply = (content: string, deepThink: boolean, webSearch: boolean) => {
     stopStream();
-    const target = chatList.value[chatList.value.length - 1]!;
+    const state = conversation.value;
+    const target = state.messages[state.messages.length - 1]!;
     const controller = new AbortController();
-    currentController.value = controller;
-    streaming.value = true;
+    state.controller = markRaw(controller);
     const finish = () => {
-      if (currentController.value === controller) {
-        streaming.value = false;
-        currentController.value = null;
-      }
+      if (state.controller === controller) state.controller = null;
     };
     sse<StreamDelta, ChatDto>(CHAT_URL, 'POST', {
       role: role.value, content, userId: userId!, deepThink, webSearch,

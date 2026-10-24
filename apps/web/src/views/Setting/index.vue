@@ -37,7 +37,7 @@
           <div class="module-row">
             <el-image
               v-if="previewUrl"
-              class="h-25 w-25 rounded-full border-2 border-gray-200 object-cover"
+              class="settings-avatar-image h-25 w-25 rounded-full border-2 border-gray-200 object-cover"
               :src="previewUrl"
               @error="previewUrl = ''"
               :zoom-rate="1.2"
@@ -106,6 +106,15 @@
                 v-model="form.name"
                 placeholder="请输入用户名"
                 clearable
+              />
+            </el-form-item>
+
+            <el-form-item label="手机号">
+              <el-input
+                class="w-full"
+                :model-value="userStore.getUser?.phone ?? ''"
+                readonly
+                aria-label="注册手机号，不可修改"
               />
             </el-form-item>
 
@@ -198,9 +207,9 @@
               退出
             </el-button>
           </div>
-          <div class="flex items-center justify-between gap-4 mt-6 pt-6 border-t border-[var(--el-border-color-light)]">
+          <div class="settings-delete-row flex items-center justify-between gap-4 mt-6 pt-6 border-t border-[var(--el-border-color-light)]">
             <div>
-              <div class="font-bold text-red-600">注销账户</div>
+              <div class="settings-delete-title"><span>注销账户</span></div>
               <div class="text-sm text-slate-500">永久删除个人资料、学习记录、课程购买记录和聊天数据，无法恢复</div>
             </div>
             <el-button @click="deleteAccountHandle" type="danger" :loading="deletingAccount" :disabled="saving">

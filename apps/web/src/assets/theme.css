@@ -83,7 +83,6 @@
 .theme-options button:hover { background: #bc85ff26; }
 }
 .theme-options button[aria-pressed="true"] { background: var(--camp-yellow); color: #282439; }
-.theme-option-check { margin-left: auto; }
 .dark .theme-popover.el-popover.el-popper { box-shadow: 0 12px 32px #0009, 0 0 20px #b79af51a; }
 .chat-composer textarea:focus,
 .chat-composer textarea:focus-visible,
@@ -344,6 +343,7 @@ html.dark {
 @media (prefers-reduced-motion: reduce) { .agent-row { transition: none; } }
 
 .conversation-sidebar { overflow-y: auto; }
+:root:not(.dark) .chat-page .conversation-sidebar { background: #f7f3ff; }
 .agent-editor.el-dialog { max-height: calc(100dvh - 48px); overflow-y: auto; }
 @media (max-width: 600px) { .conversation-sidebar { overflow-y: hidden; } }
 .agent-editor .el-dialog__title { color: var(--camp-ink); }
@@ -450,13 +450,13 @@ html.dark {
   .wordbook-filters .el-checkbox { flex-shrink: 0; margin-right: 0; height: 28px; }
   .wordbook-filters .el-checkbox__label { font-size: 12px; padding-left: 5px; }
   .wordbook-results { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; padding: 4px 4px calc(12px + env(safe-area-inset-bottom)); }
-  .wordbook-results .word-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-  .wordbook-results .word-card { min-width: 0; min-height: 168px; padding: 12px 10px; border-radius: 13px; box-shadow: none; overflow-wrap: anywhere; }
-  .wordbook-results .word-card > div > div:first-child { font-size: 18px; line-height: 1.2; margin-bottom: 6px; }
-  .wordbook-results .word-card .text-sm { font-size: 11px; line-height: 1.5; }
-  .wordbook-results .word-card .el-icon { flex-shrink: 0; }
-  .wordbook-results .word-card .mt-3 { margin-top: 8px; gap: 4px; }
-  .wordbook-results .el-tag { height: 18px; font-size: 10px; padding-inline: 4px; }
+  .word-cards .word-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .word-cards .word-card { min-width: 0; min-height: 156px; padding: 10px 8px; border-radius: 13px; box-shadow: none; overflow: hidden; }
+  .word-cards .word-card > div > div:first-child { font-size: 16px; line-height: 1.3; margin-bottom: 6px; }
+  .word-cards .word-card .text-sm { font-size: 11px; line-height: 1.5; }
+  .word-cards .word-card .el-icon { flex-shrink: 0; }
+  .word-cards .word-card .mt-3 { margin-top: 8px; gap: 4px; }
+  .word-cards .el-tag { height: 18px; font-size: 10px; padding-inline: 4px; }
   .wordbook-results .wordbook-load-more { min-height: 60px; padding: 16px 0; }
 }
 
@@ -657,18 +657,35 @@ html.dark {
 .chat-page .chat-current-agent { display: inline-flex; align-items: center; padding: 7px 13px; border-radius: 10px; background: #50d8f5; color: #282439; font-weight: 750; font-size: 13px; }
 .chat-page .chat-sidebar-toggle { color: var(--el-text-color-primary); }
 
+/* Compact composer actions, independent of the textarea font size. */
+.chat-page .chat-composer .module-row { gap: 8px; }
+.chat-page .chat-think-chip, .chat-page .chat-search-chip {
+  display: inline-flex; align-items: center; justify-content: center; gap: 3px;
+  height: 30px; padding: 0 10px; font-size: 12px; line-height: 18px;
+}
+.chat-page .chat-send { width: 30px; height: 30px; min-width: 30px; min-height: 30px; margin-left: 0; }
+.chat-page .chat-composer-actions { gap: 8px; }
+.chat-page .chat-voice { justify-content: center; width: 30px; height: 30px; }
+@media (max-width: 600px) {
+  .chat-page .chat-composer .module-row { gap: 6px; padding-right: 38px; }
+  .chat-page .chat-think-chip, .chat-page .chat-search-chip { height: 26px; padding-inline: 8px; font-size: 11px; line-height: 16px; }
+  .chat-page .chat-send { width: 28px; height: 28px; min-width: 28px; min-height: 28px; }
+}
+
+/* Use the same mode colors on mobile, tablet and desktop. */
+.chat-page .chat-think-chip { border-color: #bc7aff; color: #7542ae; background: #bc7aff18; }
+.chat-page .chat-search-chip { border-color: #50d8f5; color: #08758c; background: #50d8f518; }
+.dark .chat-page .chat-think-chip { color: #cf9cff; }
+.dark .chat-page .chat-search-chip { color: #68dff7; }
+.chat-page .chat-think-chip[aria-pressed="true"] { color: #282439; background: #bc7aff; border-color: #bc7aff; }
+.chat-page .chat-search-chip[aria-pressed="true"] { color: #282439; background: #50d8f5; border-color: #50d8f5; }
+
 @media (min-width: 801px) {
   .chat-page .conversation-sidebar { padding: 16px 14px; }
   .chat-page .conversation-mode { margin-bottom: 8px; }
   .chat-page .chat-main-toolbar { min-height: 66px; padding: 14px 22px 10px; gap: 12px; border-bottom: 1px solid var(--el-border-color-light); }
   .chat-page .chat-composer { border: 1px solid var(--el-border-color); box-shadow: none; border-radius: 18px; }
   .chat-page .chat-composer:focus-within { border-color: var(--el-text-color-secondary); }
-  .chat-page .chat-think-chip { border-color: #bc7aff; color: #7542ae; background: #bc7aff18; }
-  .chat-page .chat-search-chip { border-color: #50d8f5; color: #08758c; background: #50d8f518; }
-  .dark .chat-page .chat-think-chip { color: #cf9cff; }
-  .dark .chat-page .chat-search-chip { color: #68dff7; }
-  .chat-page .chat-think-chip[aria-pressed="true"] { color: #282439; background: #bc7aff; border-color: #bc7aff; }
-  .chat-page .chat-search-chip[aria-pressed="true"] { color: #282439; background: #50d8f5; border-color: #50d8f5; }
   .chat-page .chat-send { background: #00df72; color: #173323; }
   @media (min-width: 601px) and (hover: hover) and (pointer: fine) {
   .chat-page .chat-send:enabled:hover { background: #55ef9c; }
@@ -734,7 +751,6 @@ html.dark {
   .settings-mobile-group-title { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px 12px; }
   .settings-page .setting-form .el-form-item:focus-within .el-form-item__label { color: var(--camp-focus); }
   .settings-learning-stats .learned-stat-action { font-size: 11px; }
-  .chat-send { min-width: 40px; min-height: 40px; }
   .agent-edit { width: 36px; height: 36px; }
   .learned-word-title button { width: 36px; height: 36px; }
 }
@@ -767,4 +783,121 @@ html.dark {
   }
   .settings-timing-mobile > .el-card__header { padding: 18px 20px; border-bottom: 1px solid var(--el-border-color-light); }
   .settings-timing-mobile > .el-card__body { padding: 18px 16px; }
+}
+
+/* Word details are teleported to body, so keep these styles outside page selectors. */
+.agent-editor-overlay, .wordbook-detail-overlay { background: rgb(0 0 0 / 35%); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.wordbook-detail-dialog.el-dialog {
+  display: flex; flex-direction: column; max-width: calc(100vw - 32px);
+  max-height: calc(100dvh - 48px); padding: 22px; border-radius: 20px;
+  background: var(--el-bg-color); color: var(--el-text-color-primary);
+  border: 1px solid var(--el-border-color); box-shadow: 0 16px 60px rgb(0 0 0 / 25%); overflow: hidden;
+}
+.wordbook-detail-dialog .el-dialog__header {
+  flex-shrink: 0; margin: 0 0 16px; padding: 0 42px 16px 0;
+  background: transparent; border-radius: 0; border-bottom: 1px solid var(--el-border-color-light);
+}
+.wordbook-detail-dialog .el-dialog__header .el-dialog__title {
+  display: block; padding: 0; font-size: 26px; line-height: 1.3; font-weight: 800;
+  color: var(--el-text-color-primary); overflow-wrap: anywhere; max-height: 20dvh; overflow-y: auto;
+}
+.dark .wordbook-detail-dialog .el-dialog__header .el-dialog__title { color: #cf9cff; }
+.wordbook-detail-dialog .el-dialog__headerbtn {
+  top: 16px; right: 16px; width: 36px; height: 36px;
+  display: grid; place-items: center; border-radius: 50%; background: var(--el-fill-color-light);
+}
+.wordbook-detail-dialog .el-dialog__headerbtn .el-dialog__close { color: var(--el-text-color-regular); font-size: 20px; }
+.wordbook-detail-dialog .el-dialog__body { min-height: 0; padding: 0; overflow-y: auto; overscroll-behavior: contain; }
+.wordbook-detail { overflow-wrap: anywhere; }
+.wordbook-detail-pronunciation { display: flex; align-items: center; gap: 12px; color: var(--el-text-color-secondary); font-size: 15px; }
+.wordbook-detail-pronunciation .el-button { flex-shrink: 0; width: 36px; height: 36px; }
+.wordbook-detail section { margin-top: 20px; }
+.wordbook-detail h3 { margin-bottom: 8px; font-size: 13px; font-weight: 700; color: var(--el-text-color-secondary); }
+.wordbook-detail p { margin: 0; white-space: pre-wrap; font-size: 15px; line-height: 1.8; color: var(--el-text-color-primary); }
+.wordbook-detail-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 20px; }
+.wordbook-play { display: inline-flex; flex-shrink: 0; align-items: center; cursor: pointer; }
+@media (max-width: 600px) {
+  .wordbook-card-title, .wordbook-card-phonetic { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .wordbook-card-phonetic { flex: 1; }
+  .word-cards .wordbook-card-summary { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .word-cards .wordbook-card-summary * { display: inline; }
+  .word-cards .wordbook-card-tags { display: none; }
+  .wordbook-card-tags .el-tag { flex-shrink: 0; }
+  .word-cards .word-card:focus-visible { outline: 2px solid var(--el-color-primary); outline-offset: 2px; }
+}
+
+/* Randomized word-card palette, scoped so learned-word cards stay unchanged. */
+.word-cards .word-card[data-tone="0"] { background: #ffffff; }
+.word-cards .word-card[data-tone="1"] { background: #fffbed; }
+.word-cards .word-card[data-tone="2"] { background: #f5f0ff; }
+.dark .word-cards .word-card[data-tone="0"] { background: #101010; }
+.dark .word-cards .word-card[data-tone="1"] { background: #19232e; }
+.dark .word-cards .word-card[data-tone="2"] { background: #211b2b; }
+@media (max-width: 600px) {
+  .word-cards .word-grid { grid-auto-rows: 1px; column-gap: 8px; row-gap: 0; align-items: start; }
+  .word-cards .word-card { grid-row-end: span var(--word-span, 156); height: auto; min-height: 0; align-self: start; }
+  .word-cards .wordbook-card-summary {
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+    white-space: normal; overflow-wrap: anywhere; overflow: hidden;
+  }
+  .word-cards .wordbook-card-tags:empty { display: none; }
+}
+
+/* Override the learned-page grid defaults with the shared mobile word layout. */
+@media (max-width: 600px) {
+  .learned-results .word-cards .word-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 8px; row-gap: 0; }
+}
+
+/* Compact mobile profile fields while keeping 16px inputs to avoid iOS focus zoom. */
+@media (max-width: 600px) {
+  .settings-page > .settings-heading { padding: 12px 14px; margin-bottom: 10px; gap: 6px; }
+  .settings-page > .settings-heading > div:first-child > div:first-child { font-size: 20px; line-height: 1.3; }
+  .settings-page > .settings-heading .text-sm { margin-top: 2px; font-size: 12px; line-height: 1.4; }
+  .settings-heading .settings-save-actions .el-button { min-height: 32px; height: 32px; padding: 6px 14px; }
+  .settings-heading .settings-save-actions .module-row { gap: 8px; }
+  .settings-heading .settings-save-actions .el-button + .el-button { margin-left: 0; }
+  .settings-personal-group .el-card__body { padding-block: 12px; }
+  .settings-page .setting-form .el-form-item { padding-block: 10px; }
+  .settings-page .setting-form .el-form-item:first-child { padding-top: 0; }
+  .settings-page .setting-form .el-form-item:last-child { padding-bottom: 0; }
+  .settings-page .setting-form .el-form-item__label { margin-bottom: 3px; line-height: 20px; font-size: 13px; }
+  .settings-page .setting-form .el-input__wrapper { min-height: 36px; }
+  .settings-page .setting-form .el-textarea__inner { height: 88px; min-height: 88px !important; padding: 4px 0 22px; line-height: 1.5; }
+}
+
+.settings-delete-title { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; height: 28px; margin-bottom: 4px; padding: 0 12px; border-radius: 10px; color: #9a5800; background: #fff0a6; vertical-align: middle; }
+.settings-delete-title > span { display: block; font-size: 13px; font-weight: 600; line-height: 20px; text-align: center; transform: translateY(.5px); }
+.dark .settings-delete-title { color: #ffe443; background: transparent; height: auto; padding: 0; }
+.dark .settings-delete-title > span { transform: none; }
+@media (max-width: 600px) {
+  .settings-personal-group .settings-overview { padding: 12px 16px; }
+  .settings-learning-stats { gap: 10px; }
+  .settings-learning-stats > :is(div, button) { padding: 12px; gap: 4px 6px; border-radius: 14px; }
+  .settings-learning-stats strong { font-size: 24px; line-height: 1.25; }
+  .settings-learning-stats .learned-stat-action { margin-top: 2px; padding-top: 6px; line-height: 1.3; }
+}
+
+.settings-delete-row { margin-inline: calc(-1 * var(--el-card-padding, 20px)); padding-inline: var(--el-card-padding, 20px); }
+
+/* Profile helper copy uses the same light-theme color as input placeholders. */
+html:not(.dark) .settings-scroll :is(.text-slate-500, .settings-edit-hint, .setting-tip, .settings-login-prompt p, .el-input__count, .el-input__count-inner) {
+  color: var(--el-text-color-placeholder);
+}
+html:not(.dark) .settings-scroll :is(input, textarea)::placeholder {
+  color: var(--el-text-color-placeholder);
+  opacity: 1;
+}
+
+.settings-danger-section .el-button {
+  flex-shrink: 0;
+  width: 88px;
+  height: 36px;
+  min-height: 36px;
+  padding-inline: 12px;
+}
+
+@media (max-width: 600px) {
+  .settings-page .settings-avatar-image,
+  .settings-page .guest-avatar.settings-avatar-placeholder { width: 64px; height: 64px; flex-shrink: 0; }
+  .settings-page .guest-avatar.settings-avatar-placeholder { font-size: 32px; }
 }

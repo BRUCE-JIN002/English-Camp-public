@@ -16,7 +16,7 @@
         </p>
       </header>
 
-      <el-tabs class="page-toolbar" type="card" v-model="currentTab" @tab-change="getList">
+      <el-tabs class="page-toolbar" type="card" v-model="currentTab">
         <el-tab-pane name="list" label="精选课程"></el-tab-pane>
         <el-tab-pane
           v-if="userStore.user?.id"
@@ -27,14 +27,15 @@
 
       <!-- 课程列表 -->
       <div ref="courseScroll" class="course-results" tabindex="0" aria-label="课程列表">
-      <Transition name="tab-fade" mode="out-in">
-        <div :key="currentTab">
+      <Transition name="tab-fade" mode="out-in" @before-leave="onTabLeaving" @after-enter="onTabEntered">
+        <div :key="currentTab" :data-course-tab="currentTab">
           <el-skeleton v-if="loading" :rows="8" animated />
           <div v-else-if="loadError" class="load-state" role="status"><h2>课程暂时没有加载成功</h2><p>请检查服务连接，再试一次。</p><el-button @click="getList">重新加载</el-button></div>
           <div v-else-if="list.length > 0" class="course-grid">
             <article
               v-for="(item, index) in list"
               :key="item.id"
+              :data-course-id="item.id"
               :style="{ '--entrance-delay': `${Math.min(index, 4) * 30}ms` }"
               :class="{
                 'highlight-active': highlightId === item.id,
@@ -116,9 +117,61 @@
   const { login } = useLogin();
   const router = useRouter();
 
+  let tabTransitioning = false;
+  const onTabLeaving = () => { tabTransitioning = true; };
+  const onTabEntered = () => {
+    tabTransitioning = false;
+    revealPurchasedCourse();
+  };
+  let pendingHighlight: string | null = null;
+  let highlightTimer: ReturnType<typeof setTimeout> | undefined;
+  let highlightFrame: number | undefined;
+  const clearHighlight = () => {
+    clearTimeout(highlightTimer);
+    if (highlightFrame !== undefined) cancelAnimationFrame(highlightFrame);
+    highlightFrame = undefined;
+    highlightId.value = null;
+    pendingHighlight = null;
+  };
+  const revealPurchasedCourse = () => {
+    if (disposed || tabTransitioning || currentTab.value !== 'my' || loading.value || !pendingHighlight) return;
+    const card = Array.from(courseScroll.value?.querySelectorAll<HTMLElement>('[data-course-tab="my"] [data-course-id]') ?? [])
+      .find(element => element.dataset.courseId === pendingHighlight);
+    if (!card) return; // The tab transition may still be mounting its new content.
+    const courseId = pendingHighlight;
+    pendingHighlight = null;
+    card.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    let started: number | undefined;
+    let stableSince: number | undefined;
+    let previousTop: number | undefined;
+    const waitForScroll = (now: number) => {
+      highlightFrame = undefined;
+      if (disposed || currentTab.value !== 'my' || loading.value || !card.isConnected) return;
+      started ??= now;
+      const rect = card.getBoundingClientRect();
+      const container = courseScroll.value!;
+      const bounds = container.getBoundingClientRect();
+      const innerScroll = container.scrollHeight > container.clientHeight &&
+        /auto|scroll/.test(getComputedStyle(container).overflowY);
+      const visibleTop = innerScroll ? Math.max(0, bounds.top) : 0;
+      const visibleBottom = innerScroll ? Math.min(window.innerHeight, bounds.bottom) : window.innerHeight;
+      const center = (rect.top + rect.bottom) / 2;
+      const visible = center >= visibleTop && center <= visibleBottom;
+      if (previousTop === undefined || Math.abs(rect.top - previousTop) > 0.5) stableSince = now;
+      previousTop = rect.top;
+      if (visible && now - started >= 200 && now - (stableSince ?? now) >= 120) {
+        highlightId.value = courseId;
+        clearTimeout(highlightTimer);
+        highlightTimer = setTimeout(() => { highlightId.value = null; }, 2100);
+        return;
+      }
+      if (now - started < 4000) highlightFrame = requestAnimationFrame(waitForScroll);
+    };
+    highlightFrame = requestAnimationFrame(waitForScroll);
+  };
   let requestVersion = 0;
   let disposed = false;
-  onBeforeUnmount(() => { disposed = true; requestVersion++; });
+  onBeforeUnmount(() => { disposed = true; requestVersion++; clearHighlight(); });
 
   // 获取课程列表
   const getList = async () => {
@@ -135,12 +188,18 @@
       if (!res.success) throw new Error(res.message);
       list.value = res.data ?? [];
     } catch { if (isCurrent()) loadError.value = true; }
-    finally { if (isCurrent()) loading.value = false; }
+    finally {
+      if (isCurrent()) {
+        loading.value = false;
+        await nextTick();
+        revealPurchasedCourse();
+      }
+    }
   };
 
   const onPaid = async () => {
-    currentTab.value = 'my';
-    await getList();
+    if (currentTab.value === 'my') await getList();
+    else currentTab.value = 'my';
   };
 
   // 图片路径
@@ -155,28 +214,9 @@
       const myRes = await getMyCourse();
       const purchasedIds = new Set((myRes.data ?? []).map((c: Course) => c.id));
       if (purchasedIds.has(course.id)) {
+        clearHighlight();
+        pendingHighlight = course.id;
         currentTab.value = "my";
-        await nextTick();
-        getList();
-        await nextTick();
-        setTimeout(() => {
-          highlightId.value = course.id;
-          setTimeout(() => {
-            highlightId.value = null;
-            setTimeout(() => {
-              highlightId.value = course.id;
-              setTimeout(() => {
-                highlightId.value = null;
-                setTimeout(() => {
-                  highlightId.value = course.id;
-                  setTimeout(() => {
-                    highlightId.value = null;
-                  }, 250);
-                }, 250);
-              }, 250);
-            }, 250);
-          }, 250);
-        }, 300);
         return;
       }
       payVisible.value = true;
@@ -186,11 +226,15 @@
     }
   };
 
+  watch(currentTab, () => {
+    if (currentTab.value !== 'my') clearHighlight();
+    void getList();
+  });
   watch(() => route.query.tab, (tab) => {
     if (tab === 'my' && userStore.user) currentTab.value = 'my';
     else if (tab === 'list') currentTab.value = 'list';
   }, { immediate: true });
-  watch(() => userStore.user?.id, () => { list.value = []; }, { flush: 'sync' });
+  watch(() => userStore.user?.id, () => { list.value = []; clearHighlight(); }, { flush: 'sync' });
   usePageRefresh(async () => {
     if (!userStore.user && currentTab.value === 'my') currentTab.value = 'list';
     await getList();
@@ -210,9 +254,38 @@
     transform: translateY(4px);
   }
 
-  .highlight-active {
+  .courses-page .course-results .course-card {
+    position: relative;
+    overflow: visible;
+  }
+  .courses-page .course-results .course-cover {
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
+  }
+  /* Keep the highlight separate from the card's route entrance animation. */
+  .courses-page .course-results .course-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    border-radius: inherit;
     box-shadow:
       0 0 12px 4px rgba(250, 204, 21, 0.6),
       0 0 30px 8px rgba(250, 204, 21, 0.25);
+    opacity: 0;
+  }
+  .courses-page .course-results .course-card.highlight-active::after {
+    animation: purchased-course-pulse 650ms ease-in-out 3;
+  }
+  @keyframes purchased-course-pulse {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .courses-page .course-results .course-card.highlight-active::after {
+      animation: none;
+      opacity: 1;
+    }
   }
 </style>
