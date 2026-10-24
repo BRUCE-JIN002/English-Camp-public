@@ -1,0 +1,57 @@
+name: Deploy English Camp to Aliyun
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: english-ai-production
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check public files
+        run: node scripts/check-public.mjs
+      - name: Build and test release
+        shell: bash
+        run: |
+          set -euo pipefail
+          release="${GITHUB_SHA}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          echo "RELEASE_ID=$release" >> "$GITHUB_ENV"
+          docker build --build-arg RELEASE_ID="$release" --build-arg WEB_BASE=/english/ -f deploy/Dockerfile --target build -t "english-ai-build:$release" .
+          docker run --rm "english-ai-build:$release" pnpm --filter @en/server exec jest --runInBand
+          docker run --rm "english-ai-build:$release" node --test deploy/migrate-with-retry.test.cjs
+          docker build --build-arg RELEASE_ID="$release" --build-arg WEB_BASE=/english/ -f deploy/Dockerfile --target backend -t "english-ai-backend:$release" .
+          docker build --build-arg RELEASE_ID="$release" --build-arg WEB_BASE=/english/ -f deploy/Dockerfile --target web -t "english-ai-web:$release" .
+          mkdir bundle
+          docker save "english-ai-backend:$release" "english-ai-web:$release" | gzip > bundle/images.tar.gz
+          cp deploy/compose.yaml deploy/release.sh bundle/
+          (cd bundle && sha256sum images.tar.gz > images.tar.gz.sha256)
+      - name: Upload, deploy and verify
+        shell: bash
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          test -n "$DEPLOY_HOST" && test -n "$DEPLOY_USER"
+          test -n "$DEPLOY_SSH_KEY" && test -n "$DEPLOY_KNOWN_HOSTS"
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/deploy_key ~/.ssh/known_hosts
+          trap 'rm -f ~/.ssh/deploy_key' EXIT
+          opts=(-i ~/.ssh/deploy_key -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -o ServerAliveInterval=15 -o ServerAliveCountMax=4)
+          remote="english-ai-upload/$RELEASE_ID"
+          ssh "${opts[@]}" "$DEPLOY_USER@$DEPLOY_HOST" "mkdir -p '$remote'"
+          scp "${opts[@]}" bundle/* "$DEPLOY_USER@$DEPLOY_HOST:$remote/"
+          ssh "${opts[@]}" "$DEPLOY_USER@$DEPLOY_HOST" "sudo bash '$remote/release.sh' '$RELEASE_ID' \"\$HOME/$remote\""
+          curl --fail --retry 4 --retry-delay 5 "http://$DEPLOY_HOST/english/" -o /dev/null
+          curl --fail --retry 4 --retry-delay 5 "http://$DEPLOY_HOST/api/v1/course/list" -o /dev/null
+          curl --fail --retry 4 --retry-delay 5 "http://$DEPLOY_HOST/ai/v1" -o /dev/null
+          ssh "${opts[@]}" "$DEPLOY_USER@$DEPLOY_HOST" "rm -rf '$remote'"
+          printf '### English Camp deployed\n\nCommit: `%s`\n\n[Open site](http://%s/english/)\n' "$GITHUB_SHA" "$DEPLOY_HOST" >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,106 @@
+{
+  "name": "@en/server",
+  "version": "0.0.1",
+  "description": "",
+  "author": "",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "nest build",
+    "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:debug": "nest start --debug --watch",
+    "start:prod": "node dist/apps/server/apps/server/src/main.js",
+    "start:prod:ai": "node dist/apps/ai/apps/ai/src/main.js",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:integration:agents": "tsx apps/ai/test/agents.integration.ts",
+    "test:integration:learned": "tsx apps/server/test/learned.integration.ts"
+  },
+  "dependencies": {
+    "@en/common": "workspace:*",
+    "@en/config": "workspace:*",
+    "@langchain/core": "^1.1.31",
+    "@langchain/deepseek": "^1.0.16",
+    "@langchain/langgraph-checkpoint-postgres": "^1.0.1",
+    "@nestjs/bullmq": "^11.0.4",
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/config": "^4.0.3",
+    "@nestjs/core": "^10.0.0",
+    "@nestjs/jwt": "^11.0.2",
+    "@nestjs/mapped-types": "*",
+    "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/platform-socket.io": "^11.1.16",
+    "@nestjs/websockets": "^11.1.16",
+    "@prisma/adapter-pg": "^7.4.1",
+    "@prisma/client": "^7.4.1",
+    "@types/marked": "^6.0.0",
+    "@types/multer": "^2.1.0",
+    "@types/nodemailer": "^7.0.11",
+    "alipay-sdk": "^4.14.0",
+    "bullmq": "^5.71.0",
+    "dotenv": "^17.3.1",
+    "langchain": "^1.2.30",
+    "marked": "^17.0.3",
+    "minio": "^8.0.7",
+    "nanoid": "^5.1.6",
+    "nodemailer": "^8.0.2",
+    "pg": "8.18.0",
+    "reflect-metadata": "^0.2.0",
+    "rxjs": "^7.8.1",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.0.0",
+    "@nestjs/schematics": "^10.0.0",
+    "@nestjs/testing": "^10.0.0",
+    "@types/express": "^4.17.17",
+    "@types/jest": "^29.5.2",
+    "@types/node": "^20.3.1",
+    "@types/supertest": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^8.42.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "jest": "^29.5.0",
+    "prettier": "^3.0.0",
+    "prisma": "^7.4.1",
+    "source-map-support": "^0.5.21",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.1.0",
+    "ts-loader": "^9.4.3",
+    "ts-node": "^10.9.1",
+    "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": ".",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
+    "coverageDirectory": "./coverage",
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/apps/",
+      "<rootDir>/libs/"
+    ],
+    "moduleNameMapper": {
+      "^@libs/shared(|/.*)$": "<rootDir>/libs/shared/src/$1"
+    }
+  }
+}

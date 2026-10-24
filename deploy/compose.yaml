@@ -1,0 +1,136 @@
+name: english-ai
+
+x-backend: &backend
+  image: ${BACKEND_IMAGE:-english-ai-backend:local}
+  build:
+    context: ..
+    dockerfile: deploy/Dockerfile
+    target: backend
+  env_file: runtime.env
+  environment:
+    NODE_OPTIONS: --max-old-space-size=240
+    TZ: Asia/Shanghai
+    AI_INTERNAL_URL: http://ai:3001
+    ALIPAY_NOTIFY_URL: ${PUBLIC_BASE_URL:?Set your own public callback base URL in deploy/.env}
+    DATABASE_URL: postgresql://english:${POSTGRES_PASSWORD:?required}@postgres:5432/english
+    AI_DATABASE_URL: postgresql://english:${POSTGRES_PASSWORD:?required}@postgres:5432/english_chat
+    REDIS_HOST: redis
+    REDIS_PORT: 6379
+    MINIO_ENDPOINT: minio
+    MINIO_PORT: 9000
+    MINIO_USE_SSL: 0
+    MINIO_ACCESS_KEY: englishadmin
+    MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:?required}
+  restart: unless-stopped
+  mem_limit: 320m
+  depends_on:
+    postgres:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+    minio:
+      condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:18-bookworm
+    mem_limit: 192m
+    command: [postgres, -c, shared_buffers=32MB, -c, work_mem=2MB, -c, maintenance_work_mem=32MB, -c, max_connections=50]
+    environment:
+      POSTGRES_USER: english
+      POSTGRES_DB: english
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?required}
+    volumes:
+      - postgres:/var/lib/postgresql
+      - ./init-db.sql:/docker-entrypoint-initdb.d/10-chat.sql:ro
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U english -d english"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  redis:
+    image: redis:7.4-bookworm
+    mem_limit: 64m
+    command: [redis-server, --appendonly, 'yes']
+    volumes:
+      - redis:/data
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, redis-cli, ping]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  minio:
+    image: english-ai-minio:2025-09-07
+    mem_limit: 256m
+    build:
+      context: minio
+      args:
+        MINIO_RELEASE: RELEASE.2025-09-07T16-13-09Z
+    environment:
+      MINIO_ROOT_USER: englishadmin
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?required}
+    volumes:
+      - minio:/data
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, curl, -fsS, http://localhost:9000/minio/health/live]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  migrate:
+    <<: *backend
+    restart: 'no'
+    command: [pnpm, exec, prisma, migrate, deploy]
+  server:
+    <<: *backend
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://localhost:3000/api/v1/course/list').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+  ai:
+    <<: *backend
+    command: [node, dist/apps/ai/apps/ai/src/main.js]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://localhost:3001/ai/v1').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+  web:
+    image: ${WEB_IMAGE:-english-ai-web:local}
+    mem_limit: 64m
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+      target: web
+      args:
+        WEB_BASE: ${WEB_BASE:-/}
+    ports:
+      - '${WEB_BIND:-127.0.0.1}:${WEB_PORT:-18082}:80'
+    restart: unless-stopped
+    depends_on:
+      server:
+        condition: service_healthy
+      ai:
+        condition: service_healthy
+
+volumes:
+  postgres:
+  redis:
+  minio:

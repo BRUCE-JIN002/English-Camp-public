@@ -1,0 +1,21 @@
+name: Public source checks
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check public files
+        run: node scripts/check-public.mjs
+      - name: Build and test without production credentials
+        run: |
+          docker build -f deploy/Dockerfile --target build -t english-camp-check .
+          docker run --rm english-camp-check pnpm --filter @en/server exec jest --runInBand
+          docker run --rm english-camp-check node --test apps/web/tests/page-refresh.test.cjs deploy/migrate-with-retry.test.cjs
