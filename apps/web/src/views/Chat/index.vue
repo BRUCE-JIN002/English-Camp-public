@@ -14,7 +14,10 @@
       <section class="chat-main" :inert="isMobile && !sidebarCollapsed">
         <div class="chat-main-toolbar">
           <button class="chat-sidebar-toggle" :aria-label="sidebarCollapsed ? '展开 Agent 列表' : '收起 Agent 列表'" :title="sidebarCollapsed ? '展开 Agent 列表' : '收起 Agent 列表'" :aria-expanded="!sidebarCollapsed" aria-controls="agent-sidebar" @click="sidebarCollapsed = !sidebarCollapsed"><el-icon><Expand v-if="sidebarCollapsed" /><Fold v-else /></el-icon></button>
-          <span class="chat-current-agent">{{ currentAgent ? `${currentAgent.icon} ${currentAgent.name}` : 'AI 对话' }}</span>
+          <span class="chat-current-agent" :title="currentAgent?.name">
+            <span v-if="currentAgent" class="chat-current-agent-icon" aria-hidden="true">{{ currentAgent.icon }}</span>
+            <span class="agent-name">{{ currentAgent?.name ?? 'AI 对话' }}</span>
+          </span>
         </div>
       <div v-if="modesLoading || modesError || !activeId" class="agent-chat-empty">
         <h2>{{ modesLoading ? '正在加载语伴…' : modesError ? '语伴加载失败' : '创建你的第一个 Agent' }}</h2>

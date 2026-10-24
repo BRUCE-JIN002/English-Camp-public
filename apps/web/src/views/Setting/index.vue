@@ -118,10 +118,10 @@
               />
             </el-form-item>
 
-            <el-form-item class="setting-switch-row" label="定时任务" prop="isTimingTask">
-              <el-switch v-model="form.isTimingTask" />
+            <el-form-item class="setting-switch-row settings-timing-desktop" label="定时任务" prop="isTimingTask">
+              <el-switch v-model="form.isTimingTask" :before-change="beforeTimingChange" />
             </el-form-item>
-            <el-form-item label="定时任务时间" prop="timingTaskTime">
+            <el-form-item class="settings-timing-desktop" label="定时任务时间" prop="timingTaskTime">
               <div class="w-full">
                 <el-time-picker
                   style="width: 100%"
@@ -163,6 +163,20 @@
       </el-col>
     </el-row>
     </section>
+    <el-card v-if="userStore.getUser" shadow="never" class="settings-timing-mobile">
+      <template #header><h2 class="font-bold">定时任务</h2></template>
+      <el-form class="setting-form" :model="form" :disabled="saving">
+        <el-form-item class="setting-switch-row" label="开启定时任务">
+          <el-switch v-model="form.isTimingTask" :before-change="beforeTimingChange" />
+        </el-form-item>
+        <el-form-item label="提醒时间">
+          <div class="w-full">
+            <el-time-picker v-model="form.timingTaskTime" style="width: 100%" format="HH:mm:ss" value-format="HH:mm:ss" placeholder="请选择提醒时间" />
+            <p class="setting-tip mt-3 text-xs text-slate-500">先填写个人信息中的邮箱并选择时间，再开启提醒。</p>
+          </div>
+        </el-form-item>
+      </el-form>
+    </el-card>
     <el-card shadow="never" class="settings-operations-group" :class="{ 'settings-guest-operations': !userStore.getUser }">
       <template #header><h2 class="font-bold"><span class="settings-desktop-title">危险操作</span><span class="settings-mobile-title">偏好与账号操作</span></h2></template>
       <section class="settings-theme-panel" aria-label="主题外观">
@@ -184,7 +198,7 @@
               退出
             </el-button>
           </div>
-          <div class="flex items-center justify-between gap-4 mt-6 pt-6 border-t border-slate-200">
+          <div class="flex items-center justify-between gap-4 mt-6 pt-6 border-t border-[var(--el-border-color-light)]">
             <div>
               <div class="font-bold text-red-600">注销账户</div>
               <div class="text-sm text-slate-500">永久删除个人资料、学习记录、课程购买记录和聊天数据，无法恢复</div>
@@ -258,11 +272,26 @@
     const res = await uploadAvatar(formData);
     if (res.success && res.data) {
       form.value.avatar = res.data.databaseUrl;
-      previewUrl.value = res.data.previewUrl;
+      // Use the same public media URL as saved avatars, not MinIO's internal host.
+      previewUrl.value = customAvatar(res.data.databaseUrl);
     } else {
       ElMessage.error(res.message);
     }
   };
+
+  const timingReady = () => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email || '')
+    && /^([01]\d|2[0-3]):[0-5]\d:[0-5]\d$/.test(form.value.timingTaskTime || '');
+  const beforeTimingChange = () => {
+    if (form.value.isTimingTask || timingReady()) return true;
+    ElMessage.warning('请先填写有效邮箱并选择提醒时间');
+    return false;
+  };
+  watch(() => [form.value.email, form.value.timingTaskTime], () => {
+    if (form.value.isTimingTask && !timingReady()) {
+      form.value.isTimingTask = false;
+      ElMessage.warning('邮箱或提醒时间不完整，定时任务已关闭，请保存修改');
+    }
+  });
 
   //表单验证规则
   const rules: FormRules = {
@@ -273,7 +302,7 @@
         validator: (rule, value, callback) => {
           if (
             value &&
-            !/^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/.test(value)
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
           ) {
             callback(new Error("请输入正确的邮箱"));
           } else {
@@ -292,13 +321,17 @@
       },
     ],
     timingTaskTime: [
-      { required: true, message: "请选择定时任务时间", trigger: "blur" },
+      { validator: (_rule, _value, callback) => callback(form.value.isTimingTask && !timingReady() ? new Error("请填写有效邮箱并选择提醒时间") : undefined), trigger: "change" },
     ],
   };
 
   //提交保存接口的
   const onSave = async () => {
     if (!isDirty.value || saving.value) return;
+    if (form.value.isTimingTask && !timingReady()) {
+      ElMessage.warning('请先填写有效邮箱并选择提醒时间');
+      return;
+    }
     const valid = await formRef.value?.validate().catch(() => false);
     if (!valid) return;
     saving.value = true;

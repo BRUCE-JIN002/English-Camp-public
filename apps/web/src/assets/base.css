@@ -1,5 +1,30 @@
 @import "tailwindcss";
 
+/* Preserve full values while keeping long single-line fields within their layout. */
+.el-form-item__content,
+.el-input,
+.el-input__wrapper,
+.el-select,
+.el-select__wrapper { min-width: 0; }
+input:not([type]),
+input:is([type="text"], [type="email"], [type="tel"], [type="url"], [type="search"], [type="password"]) {
+  min-width: 0;
+  max-width: 100%;
+  text-overflow: ellipsis;
+}
+input:not([type]):focus,
+input:is([type="text"], [type="email"], [type="tel"], [type="url"], [type="search"], [type="password"]):focus {
+  text-overflow: clip;
+}
+.el-select__selected-item { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Touch taps must not retain desktop hover effects, including group-hover. */
+@custom-variant hover {
+  @media (min-width: 601px) and (hover: hover) and (pointer: fine) {
+    &:hover { @slot; }
+  }
+}
+
 :root {
   --app-max-width: 1200px;
   --app-gutter: 28px;
@@ -43,7 +68,9 @@ button:disabled { cursor: not-allowed; }
 .brand-mark span { position: absolute; top: -10px; right: -9px; font-size: 25px; color: #ffbb36; -webkit-text-stroke: 1px var(--camp-ink); }
 .camp-nav { display: flex; gap: 6px; }
 .camp-nav button { display: flex; align-items: center; justify-content: center; gap: 6px; border: 1.5px solid transparent; border-radius: 12px; padding: 10px 14px; color: #655f76; white-space: nowrap; font-size: 14px; font-weight: 700; }
+@media (min-width: 601px) and (hover: hover) and (pointer: fine){
 .camp-nav button:hover { background: #eee5ff; color: var(--camp-ink); }
+}
 .camp-nav button.active { border-color: var(--camp-ink); background: var(--camp-yellow); color: var(--camp-ink); box-shadow: 2px 2px 0 var(--camp-ink); }
 .header-account { display: flex; align-items: center; gap: 12px; }
 .header-stat { display: flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; }
@@ -64,7 +91,9 @@ button:disabled { cursor: not-allowed; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
 .camp-button { display: inline-flex; align-items: center; justify-content: center; gap: 20px; padding: 12px 22px; border: 2px solid var(--camp-ink); border-radius: 12px; background: white; color: var(--camp-ink); font-size: 14px; font-weight: 800; box-shadow: 3px 3px 0 var(--camp-ink); transition: transform .15s, box-shadow .15s; }
 .camp-button.primary { background: var(--camp-purple); color: white; }
+@media (min-width: 601px) and (hover: hover) and (pointer: fine){
 .camp-button:hover { transform: translate(-1px,-2px); box-shadow: 4px 5px 0 var(--camp-ink); }
+}
 .camp-button:active { transform: translate(2px,2px); box-shadow: none; }
 .hero-footnote { display: flex; align-items: center; gap: 7px; font-size: 11px; margin-top: 20px; }
 .hero-art { position: relative; min-height: 490px; }
@@ -87,7 +116,9 @@ button:disabled { cursor: not-allowed; }
 .learning-paths { padding-top: 48px; }.section-heading { display: flex; justify-content: space-between; align-items: end; margin-bottom: 24px; }.section-heading p { font-size: 12px; color: #777084; margin-bottom: 6px; }.section-heading h2 { font-size: 27px; font-weight: 900; letter-spacing: -1px; }.hand-note { color: #72638d; font-size: 14px; transform: rotate(-4deg); }
 .path-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 22px; }
 .path-card { display: flex; flex-direction: column; align-items: start; text-align: left; border: 2px solid var(--camp-ink); border-radius: 22px; padding: 26px; transition: box-shadow .15s; }
-.path-card:hover { box-shadow: 5px 5px 0 var(--camp-ink); }.path-chat { background: var(--camp-violet); }.path-words { background: var(--camp-mint); }.path-course { background: var(--camp-pink); }
+@media (min-width: 601px) and (hover: hover) and (pointer: fine){
+.path-card:hover { box-shadow: 5px 5px 0 var(--camp-ink); }
+}.path-chat { background: var(--camp-violet); }.path-words { background: var(--camp-mint); }.path-course { background: var(--camp-pink); }
 .path-icon { display: grid; place-items: center; font-size: 49px; line-height: 1; width: 56px; height: 54px; font-weight: 900; }.word-icon { font-size: 35px; letter-spacing: -5px; }.path-text { display: flex; flex-direction: column; gap: 10px; margin-top: 18px; }.path-text strong { font-size: 19px; font-weight: 900; }.path-text > span { font-size: 13px; line-height: 1.8; color: #43364f; }.path-link { display: flex; justify-content: space-between; width: 100%; margin-top: 25px; padding-top: 17px; border-top: 1px solid #28243930; font-size: 13px; font-weight: 800; }.path-link > span { font-size: 20px; }
 .practice-banner { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 30px; border: 2px solid var(--camp-ink); border-radius: 20px; margin-top: 28px; background: var(--camp-lime); }.practice-banner > div { display: flex; align-items: center; gap: 24px; }.banner-star { color: var(--camp-purple); font-size: 65px; line-height: 1; }.practice-banner h2 { font-size: 22px; font-weight: 900; }.practice-banner p { font-size: 13px; margin-top: 7px; color: #3f4930; }
 .camp-footer { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 35px 0; font-size: 11px; color: #776f83; }.camp-footer strong { font-size: 16px; color: var(--camp-ink); }.camp-footer strong span { color: var(--camp-purple); margin-left: 10px; }
@@ -99,15 +130,21 @@ button:disabled { cursor: not-allowed; }
 .word-grid, .course-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 22px; }
 .word-card { border: 1.5px solid #282439; border-radius: 18px; box-shadow: 3px 3px 0 #e1d8ec; padding: 23px; transition: transform 200ms ease, box-shadow 200ms ease; }.word-card:nth-child(3n+2) { background: #fffbed; }.word-card:nth-child(3n+3) { background: #f5f0ff; }.word-card > div > div:first-child { font-size: 24px; color: var(--camp-ink); font-weight: 800; margin-bottom: 10px; }
 @media (hover: hover) {
+  @media (min-width: 601px) and (hover: hover) and (pointer: fine){
   .word-card:hover {
     transform: translateY(-5px);
     box-shadow: 5px 7px 0 #c8b3e6, 0 12px 22px #28243914;
   }
+  }
 }
 @media (prefers-reduced-motion: reduce) {
+  @media (min-width: 601px) and (hover: hover) and (pointer: fine){
   .word-card:hover { transform: none; }
+  }
 }
-.course-card { border: 1.5px solid var(--camp-ink); box-shadow: 4px 4px 0 #e6dce9; border-radius: 20px; }.course-card:hover { border-color: var(--camp-purple); box-shadow: 4px 4px 0 #bba0ec; }.course-card button { background: var(--camp-yellow); color: var(--camp-ink); border: 1.5px solid var(--camp-ink); font-weight: 800; }.course-card button:hover { background: #ffec90; }.course-card h2 { font-size: 20px; }.practice-card { border: 2px solid var(--camp-ink); box-shadow: 5px 5px 0 #e4d6ff; }.practice-card .module-row { margin-top: 20px; }
+.course-card { border: 1.5px solid var(--camp-ink); box-shadow: 4px 4px 0 #e6dce9; border-radius: 20px; }@media (min-width: 601px) and (hover: hover) and (pointer: fine){.course-card:hover { border-color: var(--camp-purple); box-shadow: 4px 4px 0 #bba0ec; }
+}.course-card button { background: var(--camp-yellow); color: var(--camp-ink); border: 1.5px solid var(--camp-ink); font-weight: 800; }@media (min-width: 601px) and (hover: hover) and (pointer: fine){.course-card button:hover { background: #ffec90; }
+}.course-card h2 { font-size: 20px; }.practice-card { border: 2px solid var(--camp-ink); box-shadow: 5px 5px 0 #e4d6ff; }.practice-card .module-row { margin-top: 20px; }
 .settings-page { padding-top: 34px; padding-bottom: 50px; }.settings-page .el-card { border: 1.5px solid var(--camp-ink); border-radius: 18px; }.settings-page .el-card__header { background: #f5f0ff; }.settings-page .el-form-item { margin-bottom: 24px; }
 .chat-page { height: calc(100dvh - 120px); padding: 22px 0 0; }.chat-workspace { height: 100%; display: flex; overflow: hidden; border: 2px solid var(--camp-ink); border-radius: 22px; background: white; }.conversation-sidebar { width: 238px; flex-shrink: 0; background: #eee5ff; border-right: 1.5px solid var(--camp-ink); padding: 25px 16px; }.conversation-sidebar h2 { font-size: 21px; font-weight: 900; padding: 0 10px; }.sidebar-caption { font-size: 11px; color: #756982; margin: 8px 10px 25px; }.conversation-mode { width: 100%; text-align: left; border: 1.5px solid transparent; border-radius: 12px; margin-bottom: 7px; }.conversation-mode[aria-pressed="true"] { border-color: var(--camp-ink); background: var(--camp-yellow); box-shadow: 2px 2px 0 var(--camp-ink); }.chat-welcome { text-align: center; margin: 40px auto; max-width: 450px; }.chat-welcome > span { display: inline-grid; place-items: center; width: 85px; height: 85px; background: var(--camp-mint); border: 2px solid var(--camp-ink); border-radius: 28px; font-size: 85px; line-height: 1; font-weight: 900; transform: rotate(-8deg); }.chat-welcome h1 { font-size: 27px; font-weight: 900; margin-top: 22px; }.chat-welcome p { color: #776d83; font-size: 14px; line-height: 1.8; margin: 15px 0 23px; }.chat-composer { border: 1.5px solid var(--camp-ink); box-shadow: 3px 3px 0 #e4d6ff; }.chat-bubble .human-message { background: #eee5ff; color: var(--camp-ink); padding: 12px 16px; border: 1px solid #bba0ec; border-radius: 16px 4px 16px 16px; box-shadow: none; overflow-wrap: anywhere; }
 /* Shared controls, including teleported dialogs. */

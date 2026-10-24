@@ -184,8 +184,16 @@ export class UserService {
     // 修改前查出旧的时间配置
     const oldUser = await this.prismaService.user.findUnique({
       where: { id: user.userId },
-      select: { isTimingTask: true, timingTaskTime: true },
+      select: { isTimingTask: true, timingTaskTime: true, email: true },
     });
+
+    const timingEnabled = userUpdate.isTimingTask ?? oldUser?.isTimingTask;
+    const email = userUpdate.email === undefined ? oldUser?.email : userUpdate.email;
+    const time = userUpdate.timingTaskTime === undefined ? oldUser?.timingTaskTime : userUpdate.timingTaskTime;
+    if (timingEnabled && (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email || '')
+      || !/^([01]\d|2[0-3]):[0-5]\d:[0-5]\d$/.test(time || ''))) {
+      return this.responseService.error(null, '请先填写有效邮箱并选择提醒时间');
+    }
 
     const updatedUser = await this.prismaService.user.update({
       where: {

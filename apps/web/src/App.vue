@@ -2,11 +2,13 @@
   <RouterView />
   <Seearch />
   <Login />
+  <PortraitGuard />
 </template>
 
 <script setup lang="ts">
   import { RouterView } from "vue-router";
   import Login from "./components/Login/index.vue";
+  import PortraitGuard from "./components/PortraitGuard/index.vue";
   import Seearch from "./components/Search/index.vue";
   import { ref, provide, watch } from "vue";
   import { IS_SHOW_LOGIN } from "./components/Login/type";

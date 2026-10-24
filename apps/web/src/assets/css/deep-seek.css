@@ -97,9 +97,12 @@
   transition: color 0.15s;
 }
 
+@media (min-width: 601px) and (hover: hover) and (pointer: fine) {
+
 .deepseek-markdown a:hover {
   color: #4338ca;
   text-decoration: underline;
+}
 }
 
 /* ===== 列表样式 ===== */
@@ -235,8 +238,11 @@
   background-color: #fafafa;
 }
 
+@media (min-width: 601px) and (hover: hover) and (pointer: fine) {
+
 .deepseek-markdown tbody tr:hover {
   background-color: #f0f0ff;
+}
 }
 
 .deepseek-markdown td {

@@ -6,7 +6,7 @@
     </div>
     <p v-if="!modes.length" class="agent-empty-hint">创建一个专属语伴，开始聊天。</p>
     <div v-for="(mode, index) in modes" :key="mode.id" class="conversation-mode agent-row" :data-active="activeId === mode.id" :style="{ '--mode-delay': `${100 + Math.min(index, 7) * 35}ms` }">
-      <button class="agent-select" :aria-pressed="activeId === mode.id" @click="emit('onGetRole', mode.role)"><span aria-hidden="true">{{ mode.icon }}</span><span class="agent-name">{{ mode.name }}</span></button>
+      <button class="agent-select" :title="mode.name" :aria-pressed="activeId === mode.id" @click="emit('onGetRole', mode.role)"><span aria-hidden="true">{{ mode.icon }}</span><span class="agent-name">{{ mode.name }}</span></button>
       <button class="agent-edit" :aria-label="`编辑 ${mode.name}`" @click="openEditor(mode)"><el-icon><MoreFilled /></el-icon></button>
     </div>
     <el-dialog v-model="editorOpen" :title="editing ? '编辑 Agent' : '新建 Agent'" width="480px" align-center append-to-body class="agent-editor" :close-on-click-modal="!saving" :close-on-press-escape="!saving" :show-close="!saving">

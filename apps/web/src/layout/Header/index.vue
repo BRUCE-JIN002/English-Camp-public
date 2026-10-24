@@ -6,7 +6,7 @@
         <button v-for="route in routes" :key="route.path" @click="handleRouteClick(route)" :class="{ active: currentPath === route.path || (route.path === '/courses/index' && currentPath.startsWith('/courses/learn')) }" :aria-current="currentPath === route.path ? 'page' : undefined"><el-icon><component :is="route.icon" /></el-icon><span>{{ route.name }}</span></button>
       </nav>
       <div class="header-account">
-        <el-popover ref="themePopover" popper-class="theme-popover" :width="156" :trigger="['hover', 'click']" :show-after="100" :hide-after="150" placement="bottom-end">
+        <el-popover ref="themePopover" popper-class="theme-popover" :width="156" :trigger="profileHoverEnabled ? ['hover', 'click'] : 'click'" :show-after="profileHoverEnabled ? 100 : 0" :hide-after="150" placement="bottom-end">
           <template #reference>
             <button ref="themeButton" class="theme-picker header-theme-picker" aria-label="切换主题">
               <el-icon aria-hidden="true"><Moon v-if="themeMode === 'dark'" /><Sunny v-else-if="themeMode === 'light'" /><Monitor v-else /></el-icon>
@@ -23,7 +23,7 @@
         <span v-if="currentPath !== '/setting/index'" class="header-stat" title="打卡天数"><el-icon><Sunny /></el-icon>{{ userStore.getUser?.dayNumber ?? 0 }}</span>
         <button v-if="currentPath !== '/setting/index'" class="header-stat words" title="查看已学单词，开始复习" aria-label="已学单词，开始复习" @click="gotoPath('/learned', true)"><el-icon><Star /></el-icon>{{ userStore.getUser?.wordNumber ?? 0 }}</button>
         <button v-if="userStore.getUser" class="checkin-button" :disabled="checkedIn" @click="handleCheckIn"><el-icon><Check /></el-icon>{{ checkedIn ? '已打卡' : '打卡' }}</button>
-        <el-popover ref="profilePopover" popper-class="profile-popover" :width="300" trigger="click">
+        <el-popover ref="profilePopover" popper-class="profile-popover" :width="300" :trigger="profileHoverEnabled ? 'hover' : 'click'" :show-after="profileHoverEnabled ? 100 : 0" :hide-after="150">
           <template #reference><button class="profile-button" aria-label="打开账户菜单"><img v-if="avatar" :src="avatar" alt="用户头像" @error="onAvatarError"><span v-else class="guest-avatar" aria-hidden="true"><el-icon><User /></el-icon></span><span>{{ userStore.getUser?.name ?? '游客' }}</span></button></template>
           <Profile @onNavigate="closeProfilePopover" />
         </el-popover>
@@ -76,8 +76,8 @@
   const themePopover = ref<PopoverInstance>();
   const themeButton = ref<HTMLButtonElement>();
   const themeOptions: { value: ThemeMode; label: string; icon: typeof Sunny }[] = [
-    { value: 'light', label: '亮色主题', icon: Sunny },
-    { value: 'dark', label: '暗色主题', icon: Moon },
+    { value: 'light', label: '亮色', icon: Sunny },
+    { value: 'dark', label: '暗色', icon: Moon },
     { value: 'system', label: '跟随系统', icon: Monitor },
   ];
   const onThemeChange = (mode: ThemeMode) => {
@@ -92,6 +92,14 @@
   const currentPath = ref("");
   const profilePopover = ref<PopoverInstance>();
   const closeProfilePopover = () => profilePopover.value?.hide();
+  const profileHoverQuery = window.matchMedia('(min-width: 601px) and (hover: hover) and (pointer: fine)');
+  const profileHoverEnabled = ref(profileHoverQuery.matches);
+  const updateProfileTrigger = () => {
+    closeProfilePopover();
+    profileHoverEnabled.value = profileHoverQuery.matches;
+  };
+  onMounted(() => profileHoverQuery.addEventListener('change', updateProfileTrigger));
+  onBeforeUnmount(() => profileHoverQuery.removeEventListener('change', updateProfileTrigger));
   const userStore = useUserStore();
   const checkedIn = computed(() => userStore.checkedIn);
   const { avatar, onAvatarError } = useAvatar();
