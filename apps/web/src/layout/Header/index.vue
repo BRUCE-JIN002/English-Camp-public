@@ -125,7 +125,7 @@
     },
   );
 
-  const gotoPath = async (path: string, isAuth = false) => {
+  const gotoPath = async (path: string, isAuth = false, replace = false) => {
     if (isAuth && !userStore.getUser) {
       try {
         await login();
@@ -134,11 +134,11 @@
         return;
       }
     }
-    await router.push(path);
+    await router[replace ? 'replace' : 'push'](path);
   };
 
   const goHome = () => {
-    router.push("/");
+    router.replace("/");
   };
 
   const handleCheckIn = async () => {
@@ -160,7 +160,7 @@
 
   const handleRouteClick = async (route: NavRoute) => {
     const mobileSettings = route.path === "/setting/index" && window.matchMedia("(max-width: 600px)").matches;
-    await gotoPath(route.path, route.isAuth && !mobileSettings);
+    await gotoPath(route.path, route.isAuth && !mobileSettings, true);
   };
 
 </script>

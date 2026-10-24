@@ -111,7 +111,7 @@
   const displayName = computed(() => userStore.getUser?.name ?? "游客"); //用户名
   //跳转页面
   const gotoPath = (path: string) => {
-    router.push(path);
+    router.replace(path);
     emit("onNavigate");
   };
   //去登录
