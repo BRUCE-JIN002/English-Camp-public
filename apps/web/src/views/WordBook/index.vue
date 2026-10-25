@@ -24,7 +24,7 @@
         placeholder="请输入要查找的单词"
       ></el-input>
       <el-button @click="searchWord" type="primary">搜索</el-button>
-      <div class="wordbook-filters module-row gap-2">
+      <div class="wordbook-filters module-row gap-2" :class="{ 'filters-collapsed': filtersCollapsed, 'filters-at-top': filtersAtTop }" :inert="filtersCollapsed" :aria-hidden="filtersCollapsed">
         <el-checkbox v-model="query.gk">高考</el-checkbox>
         <el-checkbox v-model="query.zk">中考</el-checkbox>
         <el-checkbox v-model="query.gre">GRE</el-checkbox>
@@ -35,7 +35,7 @@
         <el-checkbox v-model="query.ky">考研</el-checkbox>
       </div>
     </div>
-    <div ref="wordScroll" class="wordbook-results" tabindex="0" aria-label="单词列表">
+    <div ref="wordScroll" class="wordbook-results" tabindex="0" aria-label="单词列表" @touchstart.passive="startScrollSession" @wheel.passive="startScrollSession" @keydown="onScrollKey" @scroll.passive="onWordScroll">
     <el-skeleton v-if="initialLoading" :rows="6" animated />
     <div v-else-if="loadError && !list.length" class="load-state" role="status"><h2>词库暂时没有加载成功</h2><p>请检查服务连接，再试一次。</p><el-button @click="searchWord">重新加载</el-button></div>
     <el-empty v-else-if="!list.length" description="没有找到匹配的单词，试试其他拼写或筛选条件。" />
@@ -56,6 +56,7 @@
   import { getWordBookList } from "@/apis/word-book";
   import type { WordQuery, WordList } from "@en/common/word";
   import { Reading } from "@element-plus/icons-vue";
+  import { useScrollOverlay } from "@/hooks/useScrollOverlay";
   import WordCards from "@/components/WordCards/index.vue";
 
   const loading = ref(false);
@@ -64,6 +65,8 @@
   const loadTrigger = ref<HTMLElement>();
   const wordScroll = ref<HTMLElement>();
   const mobileLayout = window.matchMedia('(max-width: 600px)');
+  const { collapsed: filtersCollapsed, atTop: filtersAtTop, restore: restoreFilters,
+    start: startScrollSession, onKey: onScrollKey, onScroll: onWordScroll } = useScrollOverlay(wordScroll);
   let observer: IntersectionObserver | undefined;
   let controller: AbortController | undefined;
   let requestVersion = 0;
@@ -92,6 +95,7 @@
     return bounds && bounds.top <= (viewport?.bottom ?? window.innerHeight) + 240 && bounds.bottom >= (viewport?.top ?? 0);
   };
   const searchWord = () => {
+    restoreFilters();
     ++requestVersion;
     controller?.abort();
     loading.value = false;
@@ -133,6 +137,7 @@
   watch(() => [query.value.gk, query.value.zk, query.value.gre, query.value.toefl,
     query.value.ielts, query.value.cet6, query.value.cet4, query.value.ky], searchWord);
   const observeScroll = () => {
+    restoreFilters();
     observer?.disconnect();
     observer = new IntersectionObserver(entries => {
       if (entries.some(entry => entry.isIntersecting) && !loadError.value) void loadMore();

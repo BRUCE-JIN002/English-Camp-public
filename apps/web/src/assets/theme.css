@@ -62,21 +62,23 @@
 .theme-picker:hover { background: #bc85ff26; }
 }
 .theme-popover.el-popover.el-popper {
-  padding: 6px;
+  min-width: 0;
+  padding: 5px;
   border: 0;
   border-radius: 14px;
   box-shadow: 0 8px 28px #28243926;
 }
 .theme-popover.el-popper .el-popper__arrow::before { border: 0; }
-.theme-options { display: grid; gap: 3px; }
+.theme-options { display: grid; gap: 2px; }
 .theme-options button {
   display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 10px;
+  gap: 6px;
+  padding: 4px 8px;
   border-radius: 9px;
   color: var(--camp-ink);
-  font-size: 13px;
+  font-size: 12px;
+  line-height: 18px;
   cursor: pointer;
 }
 @media (min-width: 601px) and (hover: hover) and (pointer: fine) {
@@ -447,9 +449,21 @@ html.dark {
   .wordbook-heading .text-2xl { font-size: 20px; line-height: 1.35; }
   .wordbook-heading > .text-sm { font-size: 10px; line-height: 1.5; margin-top: 6px; }
   .wordbook-heading .wordbook-count { margin-top: 8px; font-size: 12px; }
-  .wordbook-page .page-toolbar { flex-shrink: 0; margin: 0 0 8px; gap: 8px; }
+  .wordbook-page .page-toolbar { position: relative; z-index: 2; flex-shrink: 0; margin: 0 0 8px; gap: 8px; }
   .wordbook-page .page-toolbar > .el-input { flex: 1; min-width: 0; max-width: none; width: auto; }
   .wordbook-page .wordbook-filters { flex: 0 0 100%; flex-wrap: nowrap; overflow-x: auto; gap: 12px; }
+  .wordbook-page .wordbook-filters {
+    position: absolute; left: 0; right: 0; top: calc(100% + 8px);
+    background: var(--camp-paper);
+    height: 28px; min-height: 0; opacity: 1; margin-top: 0;
+    transition: opacity 180ms ease, transform 240ms ease;
+    transform: translateY(0);
+  }
+  .wordbook-page .wordbook-filters.filters-collapsed {
+    opacity: 0; transform: translateY(-6px);
+    overflow: hidden; pointer-events: none;
+  }
+  .wordbook-page .wordbook-filters.filters-at-top { transition: none; }
   .wordbook-filters .el-checkbox { flex-shrink: 0; margin-right: 0; height: 28px; }
   .wordbook-filters .el-checkbox__label { font-size: 12px; padding-left: 5px; }
   .wordbook-filters .el-checkbox__inner { border-radius: 50%; }
@@ -461,7 +475,7 @@ html.dark {
   .wordbook-filters .el-checkbox__input.is-checked .el-checkbox__inner::after {
     transform: translate(-50%, -50%) scale(1);
   }
-  .wordbook-results { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; padding: 4px 4px calc(12px + env(safe-area-inset-bottom)); }
+  .wordbook-results { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; padding: 40px 4px calc(12px + env(safe-area-inset-bottom)); }
   .word-cards .word-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
   .word-cards .word-card { min-width: 0; min-height: 156px; padding: 10px 8px; border-radius: 13px; box-shadow: none; overflow: hidden; }
   .word-cards .word-card > div > div:first-child { font-size: 16px; line-height: 1.3; margin-bottom: 6px; }
@@ -487,9 +501,16 @@ html.dark {
   .courses-heading h1 { font-size: 20px; line-height: 1.35; }
   .courses-heading > p:first-child { font-size: 11px; margin-bottom: 6px; }
   .courses-heading > p:last-child { font-size: 10px; line-height: 1.5; margin-top: 6px; }
-  .courses-page .page-toolbar { flex-shrink: 0; margin: 0; }
+  .courses-page .page-toolbar {
+    position: relative; z-index: 2; flex-shrink: 0; height: 48px; margin: 0 0 -48px;
+    background: var(--camp-paper); opacity: 1; transform: translateY(0);
+    transition: opacity 180ms ease, transform 240ms ease;
+  }
+  .courses-page .page-toolbar .el-tabs__content { display: none; }
+  .courses-page .page-toolbar.course-tabs-hidden { opacity: 0; transform: translateY(-6px); pointer-events: none; }
+  .courses-page .page-toolbar.course-tabs-at-top { transition: none; }
   .courses-page .el-tabs__header { margin-bottom: 8px; }
-  .course-results { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; padding: 4px 4px calc(12px + env(safe-area-inset-bottom)); }
+  .course-results { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; padding: 52px 4px calc(12px + env(safe-area-inset-bottom)); }
   .course-results .course-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .course-results .course-card { min-width: 0; border-radius: 13px; box-shadow: 3px 3px 0 #e6dce9; }
   .dark .course-results .course-card { box-shadow: 3px 3px 0 #514160; }
@@ -848,7 +869,36 @@ html.dark {
   .word-cards .word-card:focus-visible { outline: 2px solid var(--el-color-primary); outline-offset: 2px; }
 }
 
+@media (min-width: 601px) {
+  .wordbook-page .wordbook-heading { padding: 22px 34px; margin-bottom: 24px; }
+  .wordbook-heading .wordbook-count { margin-top: 10px; }
+}
+.dark .wordbook-card-tags .el-tag,
+.dark .wordbook-detail-tags .el-tag {
+  --el-tag-text-color: #d4b5ff;
+  --el-tag-bg-color: #b785ff1f;
+  --el-tag-border-color: #b785ff38;
+}
+.word-cards .word-card:focus-visible { outline: 2px solid var(--el-color-primary); outline-offset: 2px; }
 /* Randomized word-card palette, scoped so learned-word cards stay unchanged. */
+@media (min-width: 801px) {
+  .wordbook-page .word-cards .word-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-auto-rows: 1px; column-gap: 16px; row-gap: 0; align-items: start;
+  }
+  .wordbook-page .word-cards .word-card {
+    --word-row-gap: 16;
+    grid-row-end: span var(--word-span, 220);
+    height: auto; min-height: 0; min-width: 0; align-self: start;
+    padding: 16px 14px; overflow-wrap: anywhere;
+  }
+  .wordbook-page .word-cards .wordbook-card-title { font-size: 20px; }
+  .wordbook-page .word-cards .wordbook-card-summary {
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3;
+    white-space: normal; overflow: hidden;
+  }
+  .wordbook-page .wordbook-card-phonetic { min-width: 0; overflow-wrap: anywhere; }
+}
 .word-cards .word-card[data-tone="0"] { background: #ffffff; }
 .word-cards .word-card[data-tone="1"] { background: #fffbed; }
 .word-cards .word-card[data-tone="2"] { background: #f5f0ff; }
@@ -951,3 +1001,37 @@ html:not(.dark) .settings-scroll :is(input, textarea)::placeholder {
 .agent-color-options button[aria-pressed="true"] { border-color: #282439; box-shadow: 0 0 0 2px var(--el-bg-color-overlay), 0 0 0 3px var(--el-text-color-secondary); }
 
 .agent-icon-options::-webkit-scrollbar, .agent-color-options::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .wordbook-page .wordbook-filters { transition: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .courses-page .page-toolbar { transition: none; }
+}
+
+/* Learned words share the vocabulary cards, with ordinary equal-height grid rows. */
+.learned-results .word-cards-regular .word-grid {
+  grid-auto-rows: auto;
+  gap: 16px;
+  align-items: stretch;
+}
+.learned-results .word-cards-regular .word-card {
+  grid-row-end: auto;
+  height: 100%;
+  min-width: 0;
+  align-self: stretch;
+  overflow-wrap: anywhere;
+}
+@media (min-width: 801px) {
+  .learned-results .word-cards-regular .word-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .learned-results .word-cards-regular .word-card { padding: 16px 14px; }
+  .learned-results .wordbook-card-title { font-size: 20px; }
+  .learned-results .wordbook-card-summary {
+    display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3;
+    white-space: normal; overflow: hidden;
+  }
+}
+@media (max-width: 600px) {
+  .learned-results .word-cards-regular .word-grid { gap: 8px; }
+}

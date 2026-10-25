@@ -36,6 +36,9 @@ test('owned course highlight waits for loading and card mounting, and clears on 
       };
       if (name === '@/stores/user') return { useUserStore: () => ({ user: { id: 'user' } }) };
       if (name === '@/hooks/useLogin') return { useLogin: () => ({ login: async () => {} }) };
+      if (name === '@/hooks/useScrollOverlay') return { useScrollOverlay: () => ({
+        collapsed: vue.ref(false), atTop: vue.ref(true), restore() {}, start() {}, onKey() {}, onScroll() {},
+      }) };
       if (name === '@/hooks/usePageRefresh') return { usePageRefresh() {} };
       if (name === 'vue-router') return { useRouter: () => ({}), useRoute: () => ({ query: {} }) };
       return {};

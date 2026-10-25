@@ -6,7 +6,7 @@
         <button v-for="route in routes" :key="route.path" @click="handleRouteClick(route)" :class="{ active: currentPath === route.path || (route.path === '/courses/index' && currentPath.startsWith('/courses/learn')) }" :aria-current="currentPath === route.path ? 'page' : undefined"><el-icon><component :is="route.icon" /></el-icon><span>{{ route.name }}</span></button>
       </nav>
       <div class="header-account">
-        <el-popover ref="themePopover" popper-class="theme-popover" :width="156" :trigger="profileHoverEnabled ? ['hover', 'click'] : 'click'" :show-after="profileHoverEnabled ? 100 : 0" :hide-after="150" placement="bottom-end">
+        <el-popover ref="themePopover" popper-class="theme-popover" :width="128" :trigger="profileHoverEnabled ? ['hover', 'click'] : 'click'" :show-after="profileHoverEnabled ? 100 : 0" :hide-after="150" placement="bottom-end">
           <template #reference>
             <button ref="themeButton" class="theme-picker header-theme-picker" aria-label="切换主题">
               <el-icon aria-hidden="true"><Moon v-if="themeMode === 'dark'" /><Sunny v-else-if="themeMode === 'light'" /><Monitor v-else /></el-icon>
@@ -75,8 +75,8 @@
   const themePopover = ref<PopoverInstance>();
   const themeButton = ref<HTMLButtonElement>();
   const themeOptions: { value: ThemeMode; label: string; icon: typeof Sunny }[] = [
-    { value: 'light', label: '亮色', icon: Sunny },
-    { value: 'dark', label: '暗色', icon: Moon },
+    { value: 'light', label: '浅色', icon: Sunny },
+    { value: 'dark', label: '深色', icon: Moon },
     { value: 'system', label: '跟随系统', icon: Monitor },
   ];
   const onThemeChange = (mode: ThemeMode) => {

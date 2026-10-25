@@ -16,7 +16,7 @@
         </p>
       </header>
 
-      <el-tabs class="page-toolbar" type="card" v-model="currentTab">
+      <el-tabs :class="{ 'course-tabs-hidden': tabsCollapsed, 'course-tabs-at-top': tabsAtTop }" :inert="tabsCollapsed" :aria-hidden="tabsCollapsed" class="page-toolbar" type="card" v-model="currentTab">
         <el-tab-pane name="list" label="精选课程"></el-tab-pane>
         <el-tab-pane
           v-if="userStore.user?.id"
@@ -26,7 +26,7 @@
       </el-tabs>
 
       <!-- 课程列表 -->
-      <div ref="courseScroll" class="course-results" tabindex="0" aria-label="课程列表">
+      <div ref="courseScroll" class="course-results" tabindex="0" aria-label="课程列表" @touchstart.passive="startTabScroll" @wheel.passive="startTabScroll" @keydown="onTabScrollKey" @scroll.passive="onCourseScroll">
       <Transition name="tab-fade" mode="out-in" @before-leave="onTabLeaving" @after-enter="onTabEntered">
         <div :key="currentTab" :data-course-tab="currentTab">
           <el-skeleton v-if="loading" :rows="8" animated />
@@ -94,6 +94,7 @@
 </template>
 
 <script setup lang="ts">
+  import { useScrollOverlay } from "@/hooks/useScrollOverlay";
   import { ref, watch, onBeforeUnmount, nextTick } from "vue";
   import type { Course, CourseList } from "@en/common/course";
   import { getCourseList, getMyCourse } from "@/apis/course";
@@ -105,6 +106,8 @@
   import { useRouter, useRoute } from "vue-router";
 
   const courseScroll = ref<HTMLElement>();
+  const { collapsed: tabsCollapsed, atTop: tabsAtTop, restore: restoreTabs,
+    start: startTabScroll, onKey: onTabScrollKey, onScroll: onCourseScroll } = useScrollOverlay(courseScroll);
   const loading = ref(false);
   const loadError = ref(false);
   const route = useRoute();
@@ -175,6 +178,7 @@
 
   // 获取课程列表
   const getList = async () => {
+    restoreTabs();
     const version = ++requestVersion;
     const accountId = userStore.user?.id;
     const tab = currentTab.value;

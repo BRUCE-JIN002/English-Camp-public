@@ -1,15 +1,15 @@
 <template>
-  <div class="word-cards">
+  <div class="word-cards" :class="{ 'word-cards-regular': !masonry }">
     <div class="word-grid">
       <div
         class="word-card h-full min-h-[220px] cursor-pointer bg-white text-gray-800"
         v-for="(item, index) in list"
         :key="item.id"
-        v-masonry
+        v-masonry="masonry"
         :data-tone="cardTone(item.id)"
-        :role="isMobile ? 'button' : undefined"
-        :tabindex="isMobile ? 0 : undefined"
-        :aria-label="isMobile ? `查看 ${item.word} 的详情` : undefined"
+        role="button"
+        tabindex="0"
+        :aria-label="`查看 ${item.word} 的详情`"
         @click="openDetails(item)"
         @keydown.enter.self.prevent="openDetails(item)"
         @keydown.space.self.prevent="openDetails(item)"
@@ -21,15 +21,13 @@
           </div>
           <div class="text-sm text-gray-500 mb-1 flex items-center gap-2">
             <span class="wordbook-card-phonetic">{{ item.phonetic }}</span>
-            <button type="button" class="wordbook-play" :aria-label="`播放 ${item.word} 发音`" @click.stop="playAudio(item.word)">
-              <el-icon size="18" color="#2563EB"><VideoPlay /></el-icon>
-            </button>
+            <PronunciationButton :word="item.word" />
           </div>
           <div class="wordbook-card-summary text-sm text-gray-700 mb-1 overflow-hidden line-clamp-2">
-            {{ item.definition }}
+            {{ plainText(item.definition) }}
           </div>
           <div
-            v-html="item.translation"
+            v-text="plainText(item.translation)"
             class="wordbook-card-summary text-sm text-gray-600 mb-1 overflow-hidden line-clamp-2"
           ></div>
           <div
@@ -51,9 +49,9 @@
       <article v-if="selectedWord" class="wordbook-detail">
         <div class="wordbook-detail-pronunciation">
           <span>{{ selectedWord.phonetic || '暂无音标' }}</span>
-          <el-button circle :aria-label="`播放 ${selectedWord.word} 发音`" @click="playAudio(selectedWord.word)"><el-icon><VideoPlay /></el-icon></el-button>
+          <PronunciationButton :key="selectedWord.id" :word="selectedWord.word" />
         </div>
-        <section><h3>英文释义</h3><p>{{ selectedWord.definition || '暂无英文释义' }}</p></section>
+        <section><h3>英文释义</h3><p>{{ plainText(selectedWord.definition) || '暂无英文释义' }}</p></section>
         <section><h3>中文释义</h3><p>{{ detailTranslation || '暂无中文释义' }}</p></section>
         <section v-if="selectedWord.pos"><h3>词性</h3><p>{{ selectedWord.pos }}</p></section>
         <section v-if="selectedWord.exchange"><h3>词形变化</h3><p>{{ selectedWord.exchange }}</p></section>
@@ -63,11 +61,10 @@
   </div>
 </template>
 <script setup lang="ts">
-  import { ref, computed, onMounted, onBeforeUnmount, type Directive } from 'vue';
+  import { ref, computed, onBeforeUnmount, type Directive } from 'vue';
   import type { Word } from '@en/common/word';
-  import { VideoPlay } from '@element-plus/icons-vue';
-  import { useAudio } from '@/hooks/useAudio';
-  defineProps<{ list: Word[] }>();
+  import PronunciationButton from '@/components/PronunciationButton/index.vue';
+  withDefaults(defineProps<{ list: Word[]; masonry?: boolean }>(), { masonry: true });
   // A stable pseudo-random color per word, independent of pagination and re-renders.
   const cardTone = (id: string) => {
     let hash = 2166136261;
@@ -78,41 +75,31 @@
   const masonryObserver = new ResizeObserver(entries => {
     for (const entry of entries) {
       const card = entry.target as HTMLElement;
-      const span = String(Math.ceil(card.offsetHeight) + 8);
+      const gap = Number.parseFloat(getComputedStyle(card).getPropertyValue('--word-row-gap')) || 8;
+      const span = String(Math.ceil(card.offsetHeight) + gap);
       if (card.style.getPropertyValue('--word-span') !== span) card.style.setProperty('--word-span', span);
     }
   });
   const vMasonry: Directive<HTMLElement> = {
-    mounted: element => masonryObserver.observe(element),
+    mounted: (element, binding) => { if (binding.value) masonryObserver.observe(element); },
     unmounted: element => masonryObserver.unobserve(element),
   };
-  const { playAudio } = useAudio();
-  const mobileLayout = window.matchMedia('(max-width: 600px)');
-  const isMobile = ref(mobileLayout.matches);
   const detailsVisible = ref(false);
   const selectedWord = ref<Word | null>(null);
   const openDetails = (word: Word) => {
-    if (!isMobile.value) return;
     selectedWord.value = word;
     detailsVisible.value = true;
   };
-  const detailTranslation = computed(() => {
+  const plainText = (value?: string | null) => {
     const template = document.createElement('template');
-    template.innerHTML = (selectedWord.value?.translation ?? '').replace(/<br\s*\/?\s*>/gi, '\n');
-    return (template.content.textContent ?? '').replace(/\\n/g, '\n');
-  });
+    template.innerHTML = (value ?? '').replace(/<br\s*\/?\s*>/gi, '\n');
+    return (template.content.textContent ?? '').replace(/\\r\\n|\\n|\\r/g, '\n');
+  };
+  const detailTranslation = computed(() => plainText(selectedWord.value?.translation));
   const detailTags = computed(() => {
     const tags = { gk: '高考', zk: '中考', gre: 'GRE', toefl: 'TOEFL', ielts: 'IELTS', cet6: '六级', cet4: '四级', ky: '考研' };
     return (Object.keys(tags) as Array<keyof typeof tags>).filter(key => selectedWord.value?.[key]).map(key => tags[key]);
   });
 
-  const syncLayout = () => {
-    isMobile.value = mobileLayout.matches;
-    if (!isMobile.value) detailsVisible.value = false;
-  };
-  onMounted(() => mobileLayout.addEventListener('change', syncLayout));
-  onBeforeUnmount(() => {
-    masonryObserver.disconnect();
-    mobileLayout.removeEventListener('change', syncLayout);
-  });
+  onBeforeUnmount(() => masonryObserver.disconnect());
 </script>

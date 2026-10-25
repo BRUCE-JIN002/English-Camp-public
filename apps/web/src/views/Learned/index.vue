@@ -9,15 +9,7 @@
       <el-skeleton v-else-if="loading && !list.length" :rows="6" animated />
       <div v-else-if="error && !list.length" class="load-state"><p>已学单词加载失败，请重试。</p><el-button @click="loadMore">重新加载</el-button></div>
       <el-empty v-else-if="!list.length" description="还没有已学单词，先完成一组课程学习吧。"><el-button @click="router.push('/courses/index?tab=my')">我的课程</el-button></el-empty>
-      <WordCards v-else-if="isMobile" :list="list" />
-      <div v-else class="word-grid">
-        <article v-for="(word, index) in list" :key="word.id" class="word-card learned-word" :style="{ '--entrance-delay': `${(index < 20 ? Math.min(index, 4) * 30 : 0)}ms` }">
-          <div class="learned-word-title"><h2>{{ word.word }}</h2><button :aria-label="`播放 ${word.word} 发音`" @click="playAudio(word.word)"><el-icon><VideoPlay /></el-icon></button></div>
-          <p class="learned-phonetic">{{ word.phonetic }}</p>
-          <p class="learned-definition">{{ word.definition }}</p>
-          <p class="learned-translation">{{ word.translation }}</p>
-        </article>
-      </div>
+      <WordCards v-else :list="list" :masonry="false" />
       <div ref="loadTrigger" class="wordbook-load-more" aria-live="polite">
         <span v-if="loading && list.length">正在加载更多单词…</span>
         <el-button v-else-if="error && list.length" @click="loadMore">加载失败，点击重试</el-button>
@@ -31,12 +23,10 @@ import { ref, watch, nextTick, onMounted, onBeforeUnmount } from 'vue';
 import WordCards from '@/components/WordCards/index.vue';
 import { usePageRefresh } from '@/hooks/usePageRefresh';
 import { useRouter } from 'vue-router';
-import { VideoPlay } from '@element-plus/icons-vue';
 import type { Word } from '@en/common/word';
 import { getLearnedWords } from '@/apis/learn';
 import { useUserStore } from '@/stores/user';
 import { useLogin } from '@/hooks/useLogin';
-import { useAudio } from '@/hooks/useAudio';
 const mobileLayout = window.matchMedia('(max-width: 600px)');
 const isMobile = ref(mobileLayout.matches);
 const syncLayout = () => { isMobile.value = mobileLayout.matches; observeScroll(); };
@@ -61,7 +51,6 @@ function nearBottom() {
 const router = useRouter();
 const userStore = useUserStore();
 const { login } = useLogin();
-const { playAudio } = useAudio();
 const list = ref<Word[]>([]);
 const total = ref(0);
 const loading = ref(false);

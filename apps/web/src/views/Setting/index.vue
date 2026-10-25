@@ -244,8 +244,8 @@
   const { logout, login } = useLogin();
   const { themeMode, setTheme } = useTheme();
   const themeOptions = [
-    { value: 'light', label: '亮色' },
-    { value: 'dark', label: '暗色' },
+    { value: 'light', label: '浅色' },
+    { value: 'dark', label: '深色' },
     { value: 'system', label: '跟随系统' },
   ] as const;
   const changeTheme = (mode: ThemeMode, event: Event) => {
