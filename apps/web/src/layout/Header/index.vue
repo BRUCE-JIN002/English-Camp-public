@@ -21,7 +21,22 @@
         </el-popover>
         <span v-if="currentPath !== '/setting/index'" class="header-stat" title="打卡天数"><el-icon><Sunny /></el-icon>{{ userStore.getUser?.dayNumber ?? 0 }}</span>
         <button v-if="currentPath !== '/setting/index'" class="header-stat words" title="查看已学单词，开始复习" aria-label="已学单词，开始复习" @click="gotoPath('/learned', true)"><el-icon><Star /></el-icon>{{ userStore.getUser?.wordNumber ?? 0 }}</button>
-        <button v-if="userStore.getUser" class="checkin-button" :disabled="checkedIn" @click="handleCheckIn"><el-icon><Check /></el-icon>{{ checkedIn ? '已打卡' : '打卡' }}</button>
+        <button v-if="userStore.getUser" class="checkin-button" :disabled="checkedIn" @click="handleCheckIn">
+          <svg v-if="checkedIn" class="checkin-flower" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
+            <g fill="#ffadd2" stroke="#9b426e" stroke-width="1.1">
+              <circle cx="12" cy="5" r="3.5" />
+              <circle cx="18" cy="8.5" r="3.5" />
+              <circle cx="18" cy="15.5" r="3.5" />
+              <circle cx="12" cy="19" r="3.5" />
+              <circle cx="6" cy="15.5" r="3.5" />
+              <circle cx="6" cy="8.5" r="3.5" />
+            </g>
+            <circle cx="12" cy="12" r="5" fill="#ffe18a" stroke="#9b426e" stroke-width="1.1" />
+            <g fill="#493820"><circle cx="10.3" cy="11" r=".7" /><circle cx="13.7" cy="11" r=".7" /></g>
+            <path d="M10 13.2Q12 15.4 14 13.2" stroke="#493820" stroke-width="1.2" stroke-linecap="round" />
+          </svg>
+          <span>{{ checkedIn ? '已打卡' : '打卡' }}</span>
+        </button>
         <el-popover ref="profilePopover" popper-class="profile-popover" :width="300" :trigger="profileHoverEnabled ? 'hover' : 'click'" :show-after="profileHoverEnabled ? 100 : 0" :hide-after="150">
           <template #reference><button class="profile-button" aria-label="打开账户菜单"><img v-if="avatar" :src="avatar" alt="用户头像" @error="onAvatarError"><span v-else class="guest-avatar" aria-hidden="true"><el-icon><User /></el-icon></span><span>{{ userStore.getUser?.name ?? '游客' }}</span></button></template>
           <Profile @onNavigate="closeProfilePopover" />
@@ -42,7 +57,6 @@
     Notebook,
     MagicStick,
     Reading,
-    Check,
   } from "@element-plus/icons-vue";
   import { useTheme, type ThemeMode } from "@/hooks/useTheme";
   import { useRouter } from "vue-router";

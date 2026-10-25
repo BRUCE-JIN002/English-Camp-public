@@ -506,6 +506,11 @@ html.dark {
     background: var(--camp-paper); opacity: 1; transform: translateY(0);
     transition: opacity 180ms ease, transform 240ms ease;
   }
+  /* Overlap the scroll layer edge to prevent fractional-pixel seams on iOS. */
+  .courses-page .page-toolbar::before {
+    content: ''; position: absolute; inset: -2px 0 0; z-index: -1;
+    background: var(--camp-paper); pointer-events: none;
+  }
   .courses-page .page-toolbar .el-tabs__content { display: none; }
   .courses-page .page-toolbar.course-tabs-hidden { opacity: 0; transform: translateY(-6px); pointer-events: none; }
   .courses-page .page-toolbar.course-tabs-at-top { transition: none; }
@@ -1034,4 +1039,13 @@ html:not(.dark) .settings-scroll :is(input, textarea)::placeholder {
 }
 @media (max-width: 600px) {
   .learned-results .word-cards-regular .word-grid { gap: 8px; }
+}
+
+/* Explicit SVG sizing avoids emoji/font differences and flex shrink on mobile. */
+.checkin-button { flex-shrink: 0; justify-content: center; gap: 5px; white-space: nowrap; }
+.checkin-button .checkin-flower { display: block; width: 18px; height: 18px; flex: 0 0 18px; }
+.checkin-button > span { display: block; line-height: 18px; }
+@media (max-width: 600px) {
+  .checkin-button .checkin-flower { width: 16px; height: 16px; flex-basis: 16px; }
+  .checkin-button > span { line-height: 16px; }
 }

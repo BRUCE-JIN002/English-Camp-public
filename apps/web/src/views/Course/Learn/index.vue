@@ -61,15 +61,11 @@
                     >
                       {{ currentWord.phonetic }}
                     </span>
-                    <el-icon
+                    <PronunciationButton
                       v-if="currentWord?.word"
-                      class="shrink-0 cursor-pointer text-slate-400 hover:text-indigo-400 transition-colors"
-                      :size="18"
-                      title="发音"
-                      @click="playAudio(currentWord!.word)"
-                    >
-                      <VideoPlay />
-                    </el-icon>
+                      :key="currentWord.id"
+                      :word="currentWord.word"
+                    />
                   </div>
                 </div>
                 <el-icon
@@ -109,13 +105,17 @@
                 />
               </div>
               <!--拼写练习-->
-              <div class="rounded-lg bg-zinc-50/80 border border-zinc-100 p-4">
+              <div class="mt-4 rounded-lg bg-zinc-50/80 border border-zinc-100 p-4">
                 <p
                   class="text-xs font-medium text-zinc-400 uppercase tracking-wide mb-2"
                 >
                   拼写
                 </p>
-                <div class="module-row justify-center">
+                <div
+                  class="spelling-fields"
+                  :class="{ 'spelling-fields-short': wordList.length > 0 && wordList.length <= 10 }"
+                  :style="{ '--letter-count': wordList.length }"
+                >
                   <input
                     :maxlength="1"
                     ref="inputRefs"
@@ -161,8 +161,8 @@
   import type { Word } from "@en/common/word";
   import { getWordList, saveWordsMaster, getLearnedWords } from "@/apis/learn";
   import { useRoute, useRouter } from "vue-router";
-  import { useAudio } from "@/hooks/useAudio";
-  import { View, Hide, VideoPlay } from "@element-plus/icons-vue";
+  import PronunciationButton from "@/components/PronunciationButton/index.vue";
+  import { View, Hide } from "@element-plus/icons-vue";
   import { ElMessage } from "element-plus";
   import { useUserStore } from "@/stores/user";
   import confetti from "canvas-confetti";
@@ -173,7 +173,6 @@
     isTrue: boolean | undefined;
   }
 
-  const { playAudio } = useAudio();
   const route = useRoute();
   const router = useRouter();
   const userStore = useUserStore();
@@ -379,3 +378,25 @@
     await getWordListData();
   });
 </script>
+
+<style scoped>
+.spelling-fields {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 16px auto 0;
+}
+.spelling-fields .spelling-input { width: 28px; min-width: 0; height: 36px; padding: 0; }
+.spelling-fields-short {
+  display: grid;
+  grid-template-columns: repeat(var(--letter-count), minmax(0, 1fr));
+  width: min(100%, calc(var(--letter-count) * 36px - 8px));
+}
+.spelling-fields-short .spelling-input { width: 100%; }
+@media (min-width: 601px) {
+  .spelling-fields .spelling-input { width: 36px; height: 40px; }
+  .spelling-fields-short { width: min(100%, calc(var(--letter-count) * 44px - 8px)); }
+  .spelling-fields-short .spelling-input { width: 100%; }
+}
+</style>

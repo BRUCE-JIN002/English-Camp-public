@@ -134,3 +134,6 @@ dist
 *.zip
 id_rsa*
 id_ed25519*
+
+# Public speech provider configuration template
+!server/.env.tts.example

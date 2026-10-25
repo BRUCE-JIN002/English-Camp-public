@@ -3,7 +3,7 @@ import { readFileSync, lstatSync } from 'node:fs';
 
 // Inspect tracked content only. Never log matching credentials.
 const files = execFileSync('git', ['ls-files', '-z'], { encoding: 'utf8' }).split('\0').filter(Boolean);
-const safeEnv = new Set(['apps/web/.env.development', 'apps/web/.env.production']);
+const safeEnv = new Set(['apps/web/.env.development', 'apps/web/.env.production', 'server/.env.tts.example']);
 const rules = [
   ['private key', new RegExp('-----BEGIN (?:RSA |EC |OPENSSH |DSA )?' + 'PRIVATE KEY-----')],
   ['GitHub token', new RegExp('(?:gh[pousr]_' + '[A-Za-z0-9_]{20,}|github_pat_' + '[A-Za-z0-9_]{20,})')],

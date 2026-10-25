@@ -32,7 +32,7 @@ import { BullModule } from '@nestjs/bullmq';
     MailModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: ['.env.tts.local', '.env'],
     }),
     BullModule.forRootAsync({
       imports: [ConfigModule],
