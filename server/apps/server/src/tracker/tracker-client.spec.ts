@@ -64,4 +64,32 @@ describe('tracker login lifecycle', () => {
     s.history.pushState();
     expect(s.beacon).not.toHaveBeenCalled();
   });
+  it('reports null ErrorEvent payloads without masking the original browser error', async () => {
+    const s = setup();
+    const login = s.tracker.setUserId('a'); s.pending[0].resolve('visitor-a'); await login;
+    expect(() => s.events.error({ error: null, message: 'ResizeObserver loop completed with undelivered notifications.' })).not.toThrow();
+    const body = JSON.parse(await s.beacon.mock.calls[1][1].text());
+    expect(body.message).toBe('ResizeObserver loop completed with undelivered notifications.');
+    expect(body.stack).toBe('Stack unavailable');
+    expect(body.url).toBe('http://test/course');
+  });
+  it('handles null, undefined, strings, circular and BigInt rejection reasons', async () => {
+    const s = setup();
+    const login = s.tracker.setUserId('a'); s.pending[0].resolve('visitor-a'); await login;
+    const circular: any = {}; circular.self = circular;
+    for (const reason of [null, undefined, 'failed', circular, BigInt(1)]) {
+      expect(() => s.events.unhandledrejection({ reason })).not.toThrow();
+      const body = JSON.parse(await s.beacon.mock.calls[s.beacon.mock.calls.length - 1][1].text());
+      expect(typeof body.message).toBe('string');
+      expect(body.line).toBe(0);
+    }
+  });
+  it('preserves available error stacks and positions', async () => {
+    const s = setup();
+    const login = s.tracker.setUserId('a'); s.pending[0].resolve('visitor-a'); await login;
+    s.events.unhandledrejection({ reason: { message: 'failure', stack: 'original stack', column: 2, line: 3 } });
+    const body = JSON.parse(await s.beacon.mock.calls[1][1].text());
+    expect(body).toMatchObject({ message: 'failure', stack: 'original stack', column: 2, line: 3 });
+  });
+
 });
