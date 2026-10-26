@@ -2,7 +2,7 @@
 
 English Camp 是一个面向英语学习场景的全栈应用，将 AI 对话、词汇学习、课程、学习记录和邮件摘要放在同一个平台中。前端使用 Vue 3，后端使用 NestJS，AI 能力通过 DeepSeek 与 LangChain 接入。
 
-[部署说明](deploy/README.md) · [第三方资源说明](THIRD_PARTY_NOTICES.md)
+[部署说明](deploy/README.md) · [第三方资源说明](THIRD_PARTY_NOTICES.md) · [全栈复习与面试笔记](全栈复习/README.md)
 
 这是独立的公开源码版本，使用全新的提交历史，不包含原站点的账号、订单、聊天记录、词库备份、头像、凭据或生产配置。
 
@@ -273,4 +273,4 @@ pnpm --filter @en/server test:integration:learned
 
 此仓库不会同步原私有仓库的 Git 历史或生产环境 Secrets。提交更新前运行 `node scripts/check-public.mjs`，不要加入运行环境文件、数据库备份、个人媒体或真实账号信息。
 
-源代码当前未另行指定统一的开源许可证；公开可见不代表授予任意再分发或商用许可。随附第三方模型保留原始许可证与署名，其中注册页模型包含非商业使用限制，详见 [第三方资源说明](THIRD_PARTY_NOTICES.md)。
+源代码当前未另行指定统一的开源许可证；公开可见不代表授予任意再分发或商用许可。随附第三方模型保留原始许可证与署名，其中注册页模型包含非商业使用限制，详见 [第三方资源说明](THIRD_PARTY_NOTICES.md) · [全栈复习与面试笔记](全栈复习/README.md)。

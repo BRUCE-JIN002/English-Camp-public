@@ -88,12 +88,13 @@
             <button
               type="button"
               class="flex-1 py-2.5 rounded-xl text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-500 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              :disabled="isPay"
+              :disabled="isPay || isCreating"
               @click="onConfirm"
             >
-              {{ isPay ? "支付中..." : "确认支付" }}
+              {{ isCreating ? "正在创建订单..." : isPay ? "支付中..." : "确认支付" }}
             </button>
           </div>
+          <a v-if="paymentUrl" :href="paymentUrl" target="_blank" rel="noopener noreferrer" class="block mt-4 text-center text-sm underline text-indigo-500">继续前往支付</a>
         </div>
       </div>
     </Transition>
@@ -114,6 +115,17 @@
   const modelValue = defineModel<boolean>("modelValue", {
     required: true,
   });
+  const isCreating = ref(false);
+  const paymentUrl = ref('');
+  let paymentRevision = 0;
+  let pendingWindow: Window | null = null;
+  const cancelPendingPayment = () => {
+    paymentRevision++;
+    pendingWindow?.close();
+    pendingWindow = null;
+    isCreating.value = false;
+    paymentUrl.value = '';
+  };
   const isPay = ref<boolean>(false); //是否在支付中
   const timeExpire = ref<number>(0); //支付剩余时间
   const props = defineProps<{
@@ -148,6 +160,7 @@
     clearTimeout(timer);
     const socket = getSocket();
     socket?.off('paymentSuccess', check);
+    if (!visible) cancelPendingPayment();
     if (visible) {
       completed = false;
       socket?.on('paymentSuccess', check);
@@ -155,6 +168,7 @@
     }
   });
   onBeforeUnmount(() => {
+    cancelPendingPayment();
     clearTimeout(timer);
     getSocket()?.off('paymentSuccess', check);
   });
@@ -163,27 +177,55 @@
     return uploadUrl + url;
   };
 
-  // 确认支付
+  // Reserve the tab within the user gesture, before awaiting the order API.
   const onConfirm = async () => {
+    if (isCreating.value || isPay.value || !props.course) return;
+    isCreating.value = true;
+    const revision = ++paymentRevision;
+    let tab: Window | null = null;
+    try {
+      tab = window.open('about:blank', '_blank');
+      pendingWindow = tab;
+      if (tab) {
+        tab.opener = null;
+        tab.document.title = '正在打开支付页面';
+        tab.document.body.textContent = '正在创建订单，请稍候…';
+      }
+    } catch { tab?.close(); tab = null; pendingWindow = null; }
     const body: CreatePayDto = {
-      subject: props.course?.name || "",
-      body: props.course?.teacher || "",
-      total_amount: props.course?.price || "0",
-      courseId: props.course?.id || "",
+      subject: props.course.name,
+      body: props.course.teacher || '',
+      total_amount: props.course.price || '0',
+      courseId: props.course.id,
     };
-    const res = await createPay(body);
-    if (res.code === 200) {
+    try {
+      const res = await createPay(body);
+      if (revision !== paymentRevision || !modelValue.value) { tab?.close(); return; }
+      if (res.code !== 200 || !res.data?.payUrl) throw new Error(res.message || '创建支付订单失败');
+      const url = new URL(res.data.payUrl);
+      if (url.protocol !== 'https:') throw new Error('支付链接无效，请重试');
+      paymentUrl.value = url.href;
       isPay.value = true;
-      timeExpire.value = res.data?.timeExpire;
-      window.open(res.data?.payUrl, "_blank");
-    } else {
-      ElMessage.error(res.message);
-      isPay.value = false;
+      timeExpire.value = res.data.timeExpire;
+      pendingWindow = null;
+      if (tab && !tab.closed) {
+        try { tab.location.replace(url.href); }
+        catch { tab.close(); ElMessage.warning('请点击“继续前往支付”打开支付页面'); }
+      } else ElMessage.warning('请点击“继续前往支付”打开支付页面');
+    } catch (error) {
+      tab?.close();
+      if (revision === paymentRevision) {
+        pendingWindow = null;
+        ElMessage.error(error instanceof Error ? error.message : '创建支付订单失败，请重试');
+      }
+    } finally {
+      if (revision === paymentRevision) isCreating.value = false;
     }
   };
 
   // 关闭支付弹窗
   const close = () => {
+    cancelPendingPayment();
     clearTimeout(timer);
     modelValue.value = false;
     timeExpire.value = 0;
@@ -192,6 +234,7 @@
 
   // 支付过期提示
   const tips = () => {
+    paymentUrl.value = '';
     ElMessage.error("支付已过期，请重新支付");
     isPay.value = false;
     timeExpire.value = 0;
